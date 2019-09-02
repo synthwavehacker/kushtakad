@@ -1,0 +1,62 @@
+{{ define "admin/partials/navbar" }}
+<div class="navbar-fixed black">
+  <nav class="black white-text z-depth-1">
+    <canvas width="10" height="120" id="stars"></canvas>
+    <div class="container black">
+      <div class="nav-wrapper">
+        <div class="brand-logo">
+          <div class="animated bounce">
+            <a href="/app/index">
+              <!-- <img class="brand-logo-svg" src="/assets/admin/images/logo.svg" /> -->
+              <img class="brand-logo-svg" src="/assets/admin/images/logo.svg" /> 
+            </a>
+
+            <div class="ripple ripple-1">
+              <svg class="ripple-svg" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="30" cy="30" r="24" />
+              </svg>
+            </div>
+            <div class="ripple ripple-2">
+              <svg class="ripple-svg" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="30" cy="30" r="24" />
+              </svg>
+            </div>
+            <div class="ripple ripple-3">
+              <svg class="ripple-svg" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="30" cy="30" r="24" />
+              </svg>
+            </div>
+            <!--
+
+            <div class="ripple ripple-1">
+              <svg class="ripple-svg" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="30" cy="30" r="24" />
+              </svg>
+            </div>
+            <div class="ripple ripple-2">
+              <svg class="ripple-svg" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="30" cy="30" r="24" />
+              </svg>
+            </div>
+            <div class="ripple ripple-3">
+              <svg class="ripple-svg" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="30" cy="30" r="24" />
+              </svg>
+            </div>
+             -->
+          </div>
+        </div>
+        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+        <ul class="right hide-on-med-and-down">
+          {{ template "admin/partials/navbar-desktop" . }}
+        </ul>
+      </div>
+    </div>
+  </nav>
+</div>
+
+<ul class="sidenav" id="mobile-demo">
+  {{ template "admin/partials/navbar-mobile" . }}
+</ul>
+
+{{ end }}

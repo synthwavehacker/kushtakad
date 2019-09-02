@@ -1,0 +1,121 @@
+package state
+
+import (
+	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+	"path"
+
+	packr "github.com/gobuffalo/packr/v2"
+	"github.com/gobuffalo/packr/v2/file"
+	"github.com/pkg/errors"
+)
+
+const (
+	staticDir   = "static"
+	dataDir     = "tdata"
+	imagesDir   = "images"
+	sessionsDir = "sessions"
+	dbFile      = "kushtaka.db"
+)
+
+var cwd, themePath, imagesPath, sessionsPath string
+
+// SetupFileStructure makes sure the files on the file system are in the correct state
+// if they are not, the application must fail
+func SetupFileStructure(box *packr.Box) error {
+	var err error
+
+	cwd, err = os.Getwd()
+	if err != nil {
+		return errors.Wrap(err, "unable to detect current working directory")
+	}
+
+	/*
+		themePath = path.Join(cwd, dataDir, staticDir)
+		if _, err := os.Stat(themePath); !os.IsNotExist(err) {
+			os.RemoveAll(themePath)
+		}
+	*/
+
+	imagesPath = path.Join(cwd, dataDir, imagesDir)
+	if _, err := os.Stat(imagesPath); os.IsNotExist(err) {
+		err = os.MkdirAll(imagesPath, 0744)
+		if err != nil {
+			return errors.Wrap(err, fmt.Sprintf("unable to make directory %s", imagesPath))
+		}
+	}
+
+	sessionsPath = path.Join(cwd, dataDir, sessionsDir)
+	if _, err := os.Stat(sessionsPath); os.IsNotExist(err) {
+		err = os.MkdirAll(sessionsPath, 0744)
+		if err != nil {
+			return errors.Wrap(err, fmt.Sprintf("unable to make directory %s", sessionsPath))
+		}
+	}
+
+	/*
+		packrstaticDir := "static" // packrstaticDir is the same but we add the var for readability
+		b := packr.New(packrstaticDir, staticDir)
+		err = createFiles(b)
+		if err != nil {
+			return err
+		}
+	*/
+
+	return nil
+}
+
+// createFiles is an abstraction that actually creates the directories and files
+// it walks the packr box looking for the base files to write to the file system
+func createFiles(b *packr.Box) error {
+	err := b.Walk(func(fpath string, f file.File) error {
+		dir, _ := path.Split(fpath)
+		fullDir := path.Join(themePath, dir)
+
+		if _, err := os.Stat(fullDir); os.IsNotExist(err) {
+			err = os.MkdirAll(fullDir, 0744)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("unable to make directory %s", dir))
+			}
+		}
+
+		fullPath := path.Join(themePath, fpath)
+		s, err := b.Find(fpath)
+		if err != nil {
+			return errors.Wrap(err, fmt.Sprintf("unable to find file in box %s", fullPath))
+		}
+
+		err = ioutil.WriteFile(fullPath, s, 0644)
+		if err != nil {
+			return errors.Wrap(err, fmt.Sprintf("unable to create file %s", fullPath))
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DbLocation() string {
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "DbLocation() unable to detect current working directory"))
+	}
+
+	return path.Join(cwd, dataDir, dbFile)
+}
+
+func SessionLocation() string {
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "SessionLocation() unable to detect current working directory"))
+	}
+
+	return path.Join(cwd, dataDir, sessionsDir)
+}

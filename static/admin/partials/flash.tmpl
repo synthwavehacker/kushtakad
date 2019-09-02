@@ -1,0 +1,69 @@
+{{ define "admin/partials/flash" }}
+  <div id="parent_flashy">
+
+    {{ if len .FlashFail }}
+      <div id="flashy">
+        <div class="row"></div>
+        <div class="row red lighten-1 white-text z-depth-1">
+          <div class="row">
+            <br>
+            <div class="valign-wrapper">
+              <div class="col s2 m2 l2">
+              </div>
+              <div class="col s8 m8 l8">
+                <div class="valign center-align">
+                  <ul>
+                    {{ range $k, $f := .FlashFail }}
+                      <li>{{ $f }}</li>
+                    {{ end }}
+                  </ul>
+                </div>
+              </div>
+              <div class="col s2 m2 l2">
+                <div class="valign center-align">
+                  <i id="cleary" class="whitey z-depth-0"><i class="material-icons z-depth-0 " style="cursor: pointer;">clear</i></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {{ else if len .FlashSuccess }}
+      <div id="flashy">
+        <div class="row"></div>
+        <div class="row green lighten-1 white-text z-depth-1">
+          <div class="row">
+            <br>
+            <div class="valign-wrapper">
+              <div class="col s2 m2 l2">
+              </div>
+              <div class="col s8 m8 l8">
+                <div class="valign center-align">
+                  <ul>
+                    {{ range $k, $f := .FlashSuccess }}
+                      <li>{{ $f }}</li>
+                    {{ end }}
+                  </ul>
+                </div>
+              </div>
+              <div class="col s2 m2 l2">
+                <div class="valign center-align">
+                  <i id="cleary" class="whitey z-depth-0"><i class="material-icons z-depth-0 " style="cursor: pointer;">clear</i></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {{ end }}
+  </div>
+  <script>
+    
+    $('#cleary').on('click',function(){
+      $('#flashy').delay(100).fadeOut(500);
+    }); 
+    /*
+    $('#parent_flashy').delay(4000).fadeOut(100);
+    */
+  </script>
+{{ end }}

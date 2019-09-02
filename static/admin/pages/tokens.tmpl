@@ -1,0 +1,54 @@
+<div class="row">
+
+    <form class="tform z-depth-1 col s12 m4 l4" method="post" action="/kushtaka/tokens">
+        <div class="row">
+            <h5 class="col">New Token</h5>
+        </div>
+
+        <div class="row">
+            <div class="input-field col">
+                <input id="name" type="text" name="name" value="{{ .Forms.Token.Name }}" required class="validate">
+                <label for="name" data-error="example: devops-nyc-01" data-success="valid">Give the token a name</label>
+            </div>
+        </div>
+        <div class="row">
+                <div class="input-field col s12">
+                    <select name="type">
+                        <option value="" disabled selected>Choose a token type</option>
+                        <option value="link">Link</option>
+                        <option value="pdf">Pdf</option>
+                        <option value="docx">Docx</option>
+                    </select>
+                    <label>What type of <strong>token</strong> do you want?</label>
+               </div>
+            </div>
+
+        <div class="row">
+            <div class="input-field col">
+                <button class="waves-effect waves-light teal lighten-1 btn">Create</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="col s12 m8 l8">
+        {{ if len .Tokens }}
+            {{ range $key, $token := .Tokens }}
+                <div class="marjen valign-wrapper z-depth-1">
+                    <h6><a class="tealo" href="/kushtaka/token/{{ $token.ID}}">{{ $token.Name }}</a></h6>
+                </div>
+            {{ end }}
+        {{ end }}
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var elems = document.querySelectorAll('select');
+        var instances = M.FormSelect.init(elems, options = {classes:"select-tealo", dropdownOptions: {}});
+    });
+
+    $(document).ready(function(){
+        $('select').formSelect();
+    });
+</script>

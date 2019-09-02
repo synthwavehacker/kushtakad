@@ -1,0 +1,10 @@
+{{ define "admin/partials/footer" }}
+<script>
+    $(document).ready(function() {
+      M.updateTextFields();
+      $(".sidenav").sidenav();
+      $(".dropdown-trigger").dropdown({coverTrigger: false, alignment: 'bottom', outDuration: 0, inDuration: 0});
+      $('input#email, input#password').characterCounter();
+    });
+</script>
+{{ end }}

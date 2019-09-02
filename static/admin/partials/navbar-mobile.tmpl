@@ -1,0 +1,18 @@
+{{ define "admin/partials/navbar-mobile" }}
+    {{ if .State.AdminIsSetup }}
+        {{ if .State.IsAuthd }}
+            <li><a class="active" href="/kushtaka/dashboard">Dashboard</a></li>
+            <li><a href="/kushtaka/teams/page/1/limit/100">Teams</a></li>
+            <li><a href="/kushtaka/hosts">Hosts</a></li>
+            <li><a href="/kushtaka/https">Https</a></li>
+            <li><a href="/kushtaka/smtp">Smtp</a></li>
+            <li><a href="/kushtaka/tokens/page/1/limit/100">Tokens</a></li>
+            <li><a href="/kushtaka/sensors/page/1/limit/100">Sensors</a></li>
+            <li><a href="/kushtaka/logout">Logout</a></li>
+        {{ else }}
+            <li><a href="/login">Login</a></li>
+        {{ end }}
+    {{ else }}
+        <li><a href="/setup">Setup</a></li>
+    {{ end }}
+{{ end }}

@@ -1,0 +1,14 @@
+<html>
+    {{ template "admin/partials/head" . }}
+    <body>
+        {{ template "admin/partials/navbar" . }}
+        <div class="container">
+            {{ template "admin/partials/flash" . }}
+            <div class="row">
+                <div class="row"></div>
+                {{ yield }}
+            </div>
+        </div>
+        {{ template "admin/partials/footer" . }}
+    </body>
+</html>

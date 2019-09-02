@@ -1,0 +1,74 @@
+package helpers
+
+import (
+	"crypto/rand"
+	"fmt"
+	"io"
+	"regexp"
+	"strings"
+	"unicode"
+)
+
+const SaltUser = "as2#$m,n.,p70-987asdlfjkha3465uiohnma;knz,.g[92709OW7TAHS]"
+const SaltPost = "a;knz,.g[92709OW7TAHS]2,n2309uasdnmasdQWERQWERQWERQWER"
+const SaltComment = "2-0973$%klnasnq3@#$980z09)(*kaefjth;a3453#$"
+const SaltVendor = ")(*kaefjth2-0973$%9;a3453#$@#$980z09;a3453#$"
+const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890abcdefghijklmnopqrstuvwxyz"
+const Maxlen = 32
+const ml = 8
+
+// Copy of auth.GenerateSecureKey to prevent cyclic import with auth library
+func GenerateSecureKey() string {
+	k := make([]byte, 32)
+	io.ReadFull(rand.Reader, k)
+	return fmt.Sprintf("%x", k)
+}
+
+func CheckToBool(str string) bool {
+	if str == "true" {
+		return true
+	}
+	return false
+}
+
+func CapFirstLetter(s string) string {
+	a := []rune(s)
+	a[0] = unicode.ToUpper(a[0])
+	s = string(a)
+	return s
+}
+
+func PrettifyString(s string) string {
+	//let's make pretty urls from title
+	reg, _ := regexp.Compile("[^A-Za-z0-9]+")
+	s = reg.ReplaceAllString(s, "-")
+	s = strings.ToLower(strings.Trim(s, "-"))
+	return s
+}
+
+/*
+
+func EncodeHashIds(i64 int64, salt string) (string, error) {
+	hd := hashids.NewData()
+	hd.Salt = salt
+	hd.MinLength = ml
+	h := hashids.NewWithData(hd)
+	s, err := h.EncodeInt64([]int64{i64})
+	if err != nil {
+		return "", err
+	}
+	return s, nil
+}
+
+func DecodeHashIds(s string, salt string) (int64, error) {
+	hd := hashids.NewData()
+	hd.Salt = salt
+	hd.MinLength = ml
+	h := hashids.NewWithData(hd)
+	i64, err := h.DecodeInt64WithError(s)
+	if err != nil {
+		return 0, err
+	}
+	return i64[0], err
+}
+*/

@@ -1,0 +1,23 @@
+<div class="row">
+
+        <div class="col s12 m12 l12">
+            <div class="marjen z-depth-1">
+                <h5>Token Details</h5>
+                <div class="marjen">
+                    {{ $length := len .Team.Members }} {{ if gt $length 0 }}
+                    <table class="responsive-table striped">
+                        <tbody>
+                            <thead><tr><th>Email</th><th>Delete?</th></tr></thead>
+                            {{ range $member := .Team.Members }}
+                                    <tr><td>{{ $member }}</td><td>delete</td></tr>
+                            {{ end }}
+                        </tbody>
+                    </table>
+                    {{ else }}
+                        This team does not have any members. Please add some.
+                    {{ end }}
+                </div>
+            </div>
+        </div>
+    
+    </div>

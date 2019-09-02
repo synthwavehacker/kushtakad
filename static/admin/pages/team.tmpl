@@ -1,0 +1,44 @@
+<div class="row">
+
+        <div class="col s12 m4 l4">
+            <form class="marjen z-depth-1 " method="post" action="/kushtaka/team/{{ .Team.ID }}">
+                <div class="row">
+                    <h5 class="col">Add Member</h5>
+                </div>
+        
+                <div class="row">
+                    <div class="input-field col">
+                        <input id="email" type="text" name="email" value="{{ .Forms.TeamMember.MemberToAdd }}" required class="validate">
+                        <label for="email" data-error="example: jane@example.com" data-success="valid">Add email of team member</label>
+                    </div>
+                </div>
+        
+                <div class="row">
+                    <div class="input-field col">
+                        <button class="waves-effect waves-light teal lighten-1 btn">Submit</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    
+        <div class="col s12 m8 l8">
+            <div class="marjen z-depth-1">
+                <h5>Member List</h5>
+                <div class="marjen">
+                    {{ $length := len .Team.Members }} {{ if gt $length 0 }}
+                    <table class="responsive-table striped">
+                        <tbody>
+                            <thead><tr><th>Email</th><th>Delete?</th></tr></thead>
+                            {{ range $member := .Team.Members }}
+                                    <tr><td>{{ $member }}</td><td>delete</td></tr>
+                            {{ end }}
+                        </tbody>
+                    </table>
+                    {{ else }}
+                        This team does not have any members. Please add some.
+                    {{ end }}
+                </div>
+            </div>
+        </div>
+    
+    </div>
