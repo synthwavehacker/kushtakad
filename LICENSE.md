@@ -1,5 +1,4 @@
-Copyright 2019 Jared Folkins (https://www.kushtaka.com/)
-Copyright 2016-2019 DutchSec (https://dutchsec.com/)
+Copyright 2019 Jared Folkins (https://www.kushtaka.org/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
