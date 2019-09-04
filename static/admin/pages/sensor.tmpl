@@ -1,26 +1,28 @@
 <div class="row">
-
     <div class="tform z-depth-1 col s12 m4 l4">
+
         <div class="row">
             <h5 class="col">Add Service</h5>
         </div>
 
         <div class="row">
+
             <div class="input-field col s8 m8 l8">
                 <select name="type">
                     <option value="" disabled selected>select a service</option>
                     <option value="telnet">Telnet</option>
+                    <option value="ftp">FTP</option>
+                    <option value="ssh">SSH</option>
                 </select>
            </div>
+
             <div class="input-field col">
-                <button class="btn-floating btn-large waves-effect waves-light teal lighten-1 modal-trigger" data-target="telnet-modal"><i class="material-icons">add</i></button>
+                <button class="btn-floating btn-large waves-effect waves-light teal lighten-1 modal-trigger" data-target="telnet-modal">
+                    <i class="material-icons">add</i>
+                </button>
             </div>
+
         </div>
-
-
-        <div class="row">
-        </div>
-
     </div>
 
     <div class="col s12 m8 l8">
@@ -35,7 +37,7 @@
 
 
     <!-- Telnet Modal Structures -->
-    <div id="telnet-modal" class="modal">
+    <div id="telnet-modal" class="modal-gap modal">
         <div class="modal-content">
 
                 <div class="row">
@@ -51,10 +53,6 @@
                         <input id="type" type="text" name="type" value="telnet" disabled class="validate">
                         <label for="type" data-error="example: telnet, ssh, ftp" data-success="valid">Type</label>
                     </div>
-                </div>
-        
-
-                <div class="row">
                     <div class="input-field col s2">
                         <input id="port" type="text" name="port" value="" required class="validate">
                         <label for="port" data-error="example: telnet, ssh, ftp" data-success="valid">Port</label>
@@ -62,11 +60,12 @@
                 </div>
         
                 <div class="row">
-                    <div class="input-field col s8 m8 l8">
-                        <select name="type">
-                            <option value="" disabled selected>what kind of telnet server should we emulate?</option>
+                    <div class="input-field col">
+                        <select name="emulate">
+                            <option value="" disabled selected>---</option>
                             <option value="telnet">Telnet</option>
                         </select>
+                        <label for="emulate" data-error="example: telnet, ssh, ftp" data-success="valid">What kind of telnet server should we emulate?</label>
                     </div>
                 </div>
 

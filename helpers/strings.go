@@ -9,10 +9,6 @@ import (
 	"unicode"
 )
 
-const SaltUser = "as2#$m,n.,p70-987asdlfjkha3465uiohnma;knz,.g[92709OW7TAHS]"
-const SaltPost = "a;knz,.g[92709OW7TAHS]2,n2309uasdnmasdQWERQWERQWERQWER"
-const SaltComment = "2-0973$%klnasnq3@#$980z09)(*kaefjth;a3453#$"
-const SaltVendor = ")(*kaefjth2-0973$%9;a3453#$@#$980z09;a3453#$"
 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890abcdefghijklmnopqrstuvwxyz"
 const Maxlen = 32
 const ml = 8
