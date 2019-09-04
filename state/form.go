@@ -9,7 +9,9 @@ type Forms struct {
 	Team       *models.Team
 	TeamMember *models.Team
 	Token      *models.Token
-	Sensor *models.Sensor
+	Sensor     *models.Sensor
+	Service    *models.Service
+	User       *models.User
 }
 
 func NewForms() *Forms {
@@ -20,6 +22,7 @@ func NewForms() *Forms {
 		Team:       &models.Team{},
 		TeamMember: &models.Team{},
 		Token:      &models.Token{},
-		Sensor:      &models.Sensor{},
+		Sensor:     &models.Sensor{},
+		User:       &models.User{},
 	}
 }

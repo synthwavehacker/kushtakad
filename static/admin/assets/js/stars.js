@@ -10,7 +10,6 @@ window.onload = function() {
     // TODO: jared
     // remove this comment to render
     //renderScene(); 
-    renderScene(); 
   }
 
   resizeCanvas();

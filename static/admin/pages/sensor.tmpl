@@ -1,23 +1,110 @@
 <div class="row">
 
-        <div class="col s12 m12 l12">
-            <div class="marjen z-depth-1">
-                <h5>Token Details</h5>
-                <div class="marjen">
-                    {{ $length := len .Team.Members }} {{ if gt $length 0 }}
-                    <table class="responsive-table striped">
-                        <tbody>
-                            <thead><tr><th>Email</th><th>Delete?</th></tr></thead>
-                            {{ range $member := .Team.Members }}
-                                    <tr><td>{{ $member }}</td><td>delete</td></tr>
-                            {{ end }}
-                        </tbody>
-                    </table>
-                    {{ else }}
-                        This team does not have any members. Please add some.
-                    {{ end }}
-                </div>
+    <div class="tform z-depth-1 col s12 m4 l4">
+        <div class="row">
+            <h5 class="col">Add Service</h5>
+        </div>
+
+        <div class="row">
+            <div class="input-field col s8 m8 l8">
+                <select name="type">
+                    <option value="" disabled selected>select a service</option>
+                    <option value="telnet">Telnet</option>
+                </select>
+           </div>
+            <div class="input-field col">
+                <button class="btn-floating btn-large waves-effect waves-light teal lighten-1 modal-trigger" data-target="telnet-modal"><i class="material-icons">add</i></button>
             </div>
         </div>
-    
+
+
+        <div class="row">
+        </div>
+
     </div>
+
+    <div class="col s12 m8 l8">
+        {{ if len .Sensor.Services }}
+            {{ range $key, $service := .Sensor.Services }}
+                <div class="marjen valign-wrapper z-depth-1">
+                    <h6><a class="tealo" href="/kushtaka/sensor/{{ $service.Type }}">{{ $service.Type }}</a></h6>
+                </div>
+            {{ end }}
+        {{ end }}
+    </div>
+
+
+    <!-- Telnet Modal Structures -->
+    <div id="telnet-modal" class="modal">
+        <div class="modal-content">
+
+                <div class="row">
+                    <h5 class="col">Create Service</h5>
+                </div>
+
+                <div class="row">
+                    <div class="input-field col s2">
+                        <input id="sensor_id" type="text" name="sensor_id" value="{{ .Sensor.ID }}" disabled class="validate">
+                        <label for="sensor_id" data-error="example: telnet, ssh, ftp" data-success="valid">Sensor ID</label>
+                    </div>
+                    <div class="input-field col s2">
+                        <input id="type" type="text" name="type" value="telnet" disabled class="validate">
+                        <label for="type" data-error="example: telnet, ssh, ftp" data-success="valid">Type</label>
+                    </div>
+                </div>
+        
+
+                <div class="row">
+                    <div class="input-field col s2">
+                        <input id="port" type="text" name="port" value="" required class="validate">
+                        <label for="port" data-error="example: telnet, ssh, ftp" data-success="valid">Port</label>
+                    </div>
+                </div>
+        
+                <div class="row">
+                    <div class="input-field col s8 m8 l8">
+                        <select name="type">
+                            <option value="" disabled selected>what kind of telnet server should we emulate?</option>
+                            <option value="telnet">Telnet</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="input-field col">
+                        <button onclick="postData()" class="waves-effect waves-light teal lighten-1 btn">Create</button>
+                    </div>
+                </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function(){
+        $('.modal').modal();
+    });
+
+
+    $(document).ready(function(){
+        $('select').formSelect();
+    });
+
+
+    function postData() {
+        var url = 'http://localhost:3000/kushtaka/service';
+        var data = {username: 'example'};
+
+        fetch(url, {
+        method: 'POST', // or 'PUT'
+        body: JSON.stringify(data), // data can be `string` or {object}!
+        headers:{
+            'Content-Type': 'application/json'
+        }
+        }).then(res => res.json())
+        .then(response => console.log('Success:', JSON.stringify(response)))
+        .catch(error => console.error('Error:', error));
+    }
+
+</script>

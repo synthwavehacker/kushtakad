@@ -19,6 +19,7 @@ type View struct {
 	Teams        []models.Team
 	Token        *models.Token
 	Tokens       []models.Token
+	Sensor       *models.Sensor
 	Sensors      []models.Sensor
 	Users        []models.User
 }

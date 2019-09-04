@@ -42,6 +42,23 @@ func (u User) ValidateLogin() error {
 	}.Filter()
 }
 
+func (u User) ValidateCreateUser() error {
+	u.Wash()
+	s := u.PasswordConfirm
+	return validation.Errors{
+		"Email": validation.Validate(
+			&u.Email,
+			validation.Required,
+			validation.Length(5, 128).Error("must be between 5-128 characters"),
+			is.Email.Error("must be an email address")),
+		"Password": validation.Validate(
+			&u.Password,
+			validation.Required,
+			validation.Length(12, 64).Error("must be between 12-64 characters"),
+			validation.In(s).Error("does not match 'Password Confirm'")),
+	}.Filter()
+}
+
 func (u User) ValidateSetup() error {
 	u.Wash()
 	s := u.PasswordConfirm

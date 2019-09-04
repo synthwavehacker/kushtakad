@@ -101,6 +101,8 @@ func Run() {
 
 	// users
 	kushtaka.HandleFunc("/users/page/{pid}/limit/{oid}", handlers.GetUsers).Methods("GET")
+	kushtaka.HandleFunc("/users", handlers.PostUsers).Methods("POST")
+
 	// user
 	kushtaka.HandleFunc("/user/{id}", handlers.GetUser).Methods("GET")
 	kushtaka.HandleFunc("/user/{id}", handlers.PostUser).Methods("POST")

@@ -1,37 +1,32 @@
 <div class="row">
 
-    <form class="tform z-depth-1 col s12 m4 l4" method="post" action="/kushtaka/tokens">
+    <form class="tform z-depth-1 col s12 m4 l4" method="post" action="/kushtaka/users">
         <div class="row">
             <h5 class="col">New User</h5>
         </div>
 
         <div class="row">
-            <div class="input-field col">
-                <input id="firstname" type="text" name="firstname" value="{{ .Forms.Token.Name }}" required class="validate">
-                <label for="firstname" data-error="example: jane" data-success="valid">First Name</label>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="input-field col">
-                <input id="lastname" type="text" name="lastname" value="{{ .Forms.Token.Name }}" required class="validate">
-                <label for="lastname" data-error="example: jane" data-success="valid">Last Name</label>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="input-field col">
-                <input id="email" type="text" name="email" value="{{ .Forms.Token.Name }}" required class="validate">
+            <div class="input-field col s12 m10 13">
+                <input id="email" type="text" name="email" value="{{ .Forms.User.Email }}" required class="validate">
                 <label for="email" data-error="example: jane@example.com" data-success="valid">Email</label>
             </div>
         </div>
 
         <div class="row">
-            <div class="input-field col">
-                <input id="password" type="text" name="name" value="{{ .Forms.Token.Name }}" required class="validate">
+            <div class="input-field col s12 m10 13">
+                <input id="password" type="text" name="password" value="{{ .Forms.User.Password }}" required class="validate">
                 <label for="password" data-error="" data-success="valid">Password</label>
             </div>
         </div>
+
+
+        <div class="row">
+            <div class="input-field col s12 m10 13">
+              <input id="password_confirm" type="password" name="password_confirm" value="{{ .Forms.User.PasswordConfirm }}"required class="validate" length="64" pattern=".{12,}">
+              <label for="password_confirm" data-error="required: 12 characters" data-success="valid">Password Confirm</label>
+            </div>
+          </div>
+
 
         <div class="row">
             <div class="input-field col">
@@ -41,10 +36,10 @@
     </form>
 
     <div class="col s12 m8 l8">
-        {{ if len .Tokens }}
-            {{ range $key, $token := .Tokens }}
+        {{ if len .Users }}
+            {{ range $key, $user := .Users }}
                 <div class="marjen valign-wrapper z-depth-1">
-                    <h6><a class="tealo" href="/kushtaka/token/{{ $token.ID}}">{{ $token.Name }}</a></h6>
+                    <h6><a class="tealo" href="/kushtaka/user/{{ $user.ID }}">{{ $user.Email }}</a></h6>
                 </div>
             {{ end }}
         {{ end }}

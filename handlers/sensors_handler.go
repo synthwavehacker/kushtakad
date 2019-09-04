@@ -4,12 +4,33 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 	"github.com/kushtaka/kushtakad/models"
 	"github.com/kushtaka/kushtakad/state"
 )
 
 func GetSensor(w http.ResponseWriter, r *http.Request) {
-	log.Println("GetSensor()")
+	redir := "/kushtaka/sensors/page/1/limit/100"
+	app, err := state.Restore(r)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	sensor := &models.Sensor{}
+	err = app.DB.One("ID", id, sensor)
+	if err != nil {
+		app.Fail("Sensor does not exist")
+		http.Redirect(w, r, redir, 301)
+		return
+	}
+
+	app.View.Sensor = sensor
+	app.Render.HTML(w, http.StatusOK, "admin/pages/sensor", app.View)
 	return
 }
 
@@ -46,11 +67,10 @@ func GetSensors(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.View.Sensors = sensors 
+	app.View.Sensors = sensors
 	app.Render.HTML(w, http.StatusOK, "admin/pages/sensors", app.View)
 	return
 }
-
 
 func PostSensors(w http.ResponseWriter, r *http.Request) {
 	redirUrl := "/kushtaka/sensors/page/1/limit/100"

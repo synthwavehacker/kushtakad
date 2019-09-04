@@ -1,6 +1,11 @@
 package models
 
 import (
+	"context"
+	"crypto/rand"
+	"fmt"
+	"io"
+	"net"
 	"strings"
 
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -9,16 +14,22 @@ import (
 type Sensor struct {
 	ID       int64  `storm:"id,increment,index"`
 	Name     string `storm:"index,unique" json:"name"`
+	ApiKey   string `storm:"index,unique" json:"api_key"`
 	Services []Service
 }
 
-type Service struct {
-	Port int
-	Type string
+type Service interface {
+	Handle(ctx context.Context, conn net.Conn) error
 }
 
 func NewSensor() *Sensor {
-	return &Sensor{}
+	return &Sensor{ApiKey: GenerateSecureKey()}
+}
+
+func GenerateSecureKey() string {
+	k := make([]byte, 32)
+	io.ReadFull(rand.Reader, k)
+	return fmt.Sprintf("%x", k)
 }
 
 func (s *Sensor) Wash() {

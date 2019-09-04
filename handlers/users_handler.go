@@ -50,3 +50,53 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	app.Render.HTML(w, http.StatusOK, "admin/pages/users", app.View)
 	return
 }
+
+func PostUsers(w http.ResponseWriter, r *http.Request) {
+	redir := "/kushtaka/users/page/1/limit/100"
+	app, err := state.Restore(r)
+	if err != nil {
+		log.Println(err)
+	}
+
+	user := &models.User{
+		Email:           r.FormValue("email"),
+		Password:        r.FormValue("password"),
+		PasswordConfirm: r.FormValue("password_confirm"),
+	}
+
+	err = user.ValidateCreateUser()
+	app.View.Forms.User = user
+	if err != nil {
+		app.Fail(err.Error())
+		http.Redirect(w, r, redir, 301)
+		return
+	}
+
+	user.HashPassword()
+
+	tx, err := app.DB.Begin(true)
+	if err != nil {
+		app.Fail(err.Error())
+		http.Redirect(w, r, redir, 301)
+		return
+	}
+
+	err = tx.Save(user)
+	if err != nil {
+		app.Fail(err.Error())
+		http.Redirect(w, r, redir, 301)
+		return
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		app.Fail(err.Error())
+		http.Redirect(w, r, redir, 301)
+		return
+	}
+
+	app.View.Forms = state.NewForms()
+	app.Success("User created successfully")
+	http.Redirect(w, r, redir, 301)
+	return
+}
