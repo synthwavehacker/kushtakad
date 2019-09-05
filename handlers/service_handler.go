@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/kushtaka/kushtakad/models"
 	"github.com/kushtaka/kushtakad/state"
 )
 
@@ -22,7 +23,7 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	var t Service
-	err := decoder.Decode(&t)
+	err = decoder.Decode(&t)
 	if err != nil {
 		panic(err)
 	}
@@ -39,32 +40,29 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 	tx, err := app.DB.Begin(true)
 	if err != nil {
 		tx.Rollback()
-		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 301)
+		log.Println(err)
 		return
 	}
 
+	var sensor models.Sensor
 	tx.One("ID", t.SensorID, sensor)
-	if sensor.ID > 0 {
+	if sensor.ID == 0 {
 		tx.Rollback()
-		app.Fail("Sensor using that name already exists.")
-		http.Redirect(w, r, redirUrl, 301)
+		log.Println(err)
 		return
 	}
 
-	err = tx.Save(sensor)
+	err = tx.Update(sensor)
 	if err != nil {
 		tx.Rollback()
-		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 301)
+		log.Println(err)
 		return
 	}
 
 	err = tx.Commit()
 	if err != nil {
 		tx.Rollback()
-		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 301)
+		log.Println(err)
 		return
 	}
 
