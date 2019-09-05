@@ -29,6 +29,7 @@ func GetSensor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	app.View.Links.Sensors = "active"
 	app.View.Sensor = sensor
 	app.Render.HTML(w, http.StatusOK, "admin/pages/sensor", app.View)
 	return

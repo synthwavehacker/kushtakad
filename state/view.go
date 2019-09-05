@@ -31,6 +31,7 @@ type Links struct {
 	Dashboard string
 	Tokens    string
 	Sensors   string
+	Users     string
 }
 
 func NewView() *View {

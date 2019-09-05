@@ -36,7 +36,6 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/404", 404)
 		return
 	}
-	app.View.Links.Sensors = "active"
 
 	var users []models.User
 	err = app.DB.All(&users)
@@ -47,6 +46,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.View.Users = users
+	app.View.Links.Users = "active"
 	app.Render.HTML(w, http.StatusOK, "admin/pages/users", app.View)
 	return
 }
