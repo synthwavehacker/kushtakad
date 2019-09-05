@@ -2,14 +2,14 @@
     <div class="tform z-depth-1 col s12 m4 l4">
 
         <div class="row">
-            <h5 class="col">Add Service</h5>
+            <h5 class="col">Select Service</h5>
         </div>
 
         <div class="row">
 
             <div class="input-field col s8 m8 l8">
-                <select name="type">
-                    <option value="" disabled selected>select a service</option>
+                <select id="service-type" name="type">
+                    <option value="" disabled selected>---</option>
                     <option value="telnet">Telnet</option>
                     <option value="ftp">FTP</option>
                     <option value="ssh">SSH</option>
@@ -17,7 +17,7 @@
            </div>
 
             <div class="input-field col">
-                <button class="btn-floating btn-large waves-effect waves-light teal lighten-1 modal-trigger" data-target="telnet-modal">
+                <button class="btn-floating btn-large waves-effect waves-light teal lighten-1" onclick="modalPop()">
                     <i class="material-icons">add</i>
                 </button>
             </div>
@@ -35,33 +35,27 @@
         {{ end }}
     </div>
 
+    <input hidden id="sensor_id" type="text" name="sensor_id" value="{{ .Sensor.ID }}" disabled class="validate">
+    <input hidden id="type" type="text" name="type" value="telnet" disabled class="validate">
 
     <!-- Telnet Modal Structures -->
     <div id="telnet-modal" class="modal-gap modal">
         <div class="modal-content">
 
                 <div class="row">
-                    <h5 class="col">Create Service</h5>
+                    <h5 class="col">Add Telnet Service</h5>
                 </div>
 
                 <div class="row">
                     <div class="input-field col s2">
-                        <input id="sensor_id" type="text" name="sensor_id" value="{{ .Sensor.ID }}" disabled class="validate">
-                        <label for="sensor_id" data-error="example: telnet, ssh, ftp" data-success="valid">Sensor ID</label>
-                    </div>
-                    <div class="input-field col s2">
-                        <input id="type" type="text" name="type" value="telnet" disabled class="validate">
-                        <label for="type" data-error="example: telnet, ssh, ftp" data-success="valid">Type</label>
-                    </div>
-                    <div class="input-field col s2">
-                        <input id="port" type="text" name="port" value="" required class="validate">
+                        <input id="telnet-port" type="text" name="port" value="" required class="validate">
                         <label for="port" data-error="example: telnet, ssh, ftp" data-success="valid">Port</label>
                     </div>
                 </div>
         
                 <div class="row">
                     <div class="input-field col">
-                        <select name="emulate">
+                        <select name="telnet-emulate">
                             <option value="" disabled selected>---</option>
                             <option value="telnet">Telnet</option>
                         </select>
@@ -71,7 +65,7 @@
 
                 <div class="row">
                     <div class="input-field col">
-                        <button onclick="postData()" class="waves-effect waves-light teal lighten-1 btn">Create</button>
+                        <button onclick="postData('telnet')" class="waves-effect waves-light teal lighten-1 btn">Submit</button>
                     </div>
                 </div>
 
@@ -81,19 +75,31 @@
 
 <script>
 
-    $(document).ready(function(){
-        $('.modal').modal();
-    });
 
+    document.addEventListener('DOMContentLoaded', function() {
+        var elems = document.querySelectorAll('.modal');
+        var instances = M.Modal.init(elems, {});
+    });
 
     $(document).ready(function(){
         $('select').formSelect();
     });
 
 
-    function postData() {
+    function modalPop() {
+        var el = document.getElementById("service-type");
+        var type = el.options[el.selectedIndex].value;
+
+        modalType = type + "-modal"; 
+        var modalElement = document.getElementById(modalType);
+        var instance = M.Modal.getInstance(modalElement);
+        instance.open();
+    }
+
+    function postData(serviceType) {
+        console.log(serviceType)
         var url = 'http://localhost:3000/kushtaka/service';
-        var data = {username: 'example'};
+        var data = {sensorId: 1, type: serviceType, port: 23, emulate: 'basic'};
 
         fetch(url, {
         method: 'POST', // or 'PUT'
