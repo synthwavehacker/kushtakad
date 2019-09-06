@@ -14,6 +14,6 @@ func GetDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.View.Links.Dashboard = "active"
-	app.Render.HTML(w, http.StatusOK, "admin/pages/endpoints", app.View)
+	app.Render.HTML(w, http.StatusOK, "admin/pages/dashboard", app.View)
 	return
 }

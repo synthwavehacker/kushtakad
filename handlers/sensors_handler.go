@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/kushtaka/kushtakad/models"
 	"github.com/kushtaka/kushtakad/state"
+	"github.com/kushtaka/kushtakad/service/telnet"
 )
 
 func GetSensor(w http.ResponseWriter, r *http.Request) {
@@ -25,9 +26,24 @@ func GetSensor(w http.ResponseWriter, r *http.Request) {
 	err = app.DB.One("ID", id, sensor)
 	if err != nil {
 		app.Fail("Sensor does not exist")
-		http.Redirect(w, r, redir, 301)
+		http.Redirect(w, r, redir, 302)
 		return
 	}
+	log.Println(sensor)
+
+
+	var scfg []models.ServiceCfg
+	// don't error chk, if no services found, none exist
+	app.DB.Find("SensorID", sensor.ID, &scfg)
+
+	for _, v := range scfg {
+		switch v.Type {
+		case "telnet":
+			var tel telnet.TelnetService
+			app.DB.One("ID", v.ServiceID, &tel)
+			app.View.SensorServices = append(app.View.SensorServices, tel) 
+		}
+	} 
 
 	app.View.Links.Sensors = "active"
 	app.View.Sensor = sensor
@@ -64,7 +80,7 @@ func GetSensors(w http.ResponseWriter, r *http.Request) {
 	err = app.DB.All(&sensors)
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 301)
+		http.Redirect(w, r, redirUrl, 302)
 		return
 	}
 
@@ -86,7 +102,7 @@ func PostSensors(w http.ResponseWriter, r *http.Request) {
 	err = sensor.ValidateCreate()
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 301)
+		http.Redirect(w, r, redirUrl, 302)
 		return
 	}
 
@@ -94,7 +110,7 @@ func PostSensors(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		tx.Rollback()
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 301)
+		http.Redirect(w, r, redirUrl, 302)
 		return
 	}
 
@@ -102,7 +118,7 @@ func PostSensors(w http.ResponseWriter, r *http.Request) {
 	if sensor.ID > 0 {
 		tx.Rollback()
 		app.Fail("Sensor using that name already exists.")
-		http.Redirect(w, r, redirUrl, 301)
+		http.Redirect(w, r, redirUrl, 302)
 		return
 	}
 
@@ -110,7 +126,7 @@ func PostSensors(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		tx.Rollback()
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 301)
+		http.Redirect(w, r, redirUrl, 302)
 		return
 	}
 
@@ -118,12 +134,12 @@ func PostSensors(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		tx.Rollback()
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 301)
+		http.Redirect(w, r, redirUrl, 302)
 		return
 	}
 
 	app.View.Forms = state.NewForms()
 	app.Success(fmt.Sprintf("The sensor [%s] was created successfully.", sensor.Name))
-	http.Redirect(w, r, redirUrl, 301)
+	http.Redirect(w, r, redirUrl, 302)
 	return
 }

@@ -45,33 +45,33 @@ func PostSmtp(w http.ResponseWriter, r *http.Request) {
 	app.View.Forms.Smtp = smtp
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, "/kushtaka/smtp", 301)
+		http.Redirect(w, r, "/kushtaka/smtp", 302)
 		return
 	}
 
 	tx, err := app.DB.Begin(true)
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, "/kushtaka/smtp", 301)
+		http.Redirect(w, r, "/kushtaka/smtp", 302)
 		return
 	}
 
 	err = tx.Save(smtp)
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, "/kushtaka/smtp", 301)
+		http.Redirect(w, r, "/kushtaka/smtp", 302)
 		return
 	}
 
 	err = tx.Commit()
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, "/kushtaka/smtp", 301)
+		http.Redirect(w, r, "/kushtaka/smtp", 302)
 		return
 	}
 
 	app.Success("Smtp saved successfully.")
-	http.Redirect(w, r, "/kushtaka/smtp", 301)
+	http.Redirect(w, r, "/kushtaka/smtp", 302)
 	return
 }
 

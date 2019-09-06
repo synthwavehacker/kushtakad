@@ -23,7 +23,7 @@ func GetTeam(w http.ResponseWriter, r *http.Request) {
 	err = app.DB.One("ID", id, team)
 	if err != nil {
 		app.Fail("Team does not exist")
-		http.Redirect(w, r, "/kushtaka/teams/page/1/limit/100", 301)
+		http.Redirect(w, r, "/kushtaka/teams/page/1/limit/100", 302)
 		return
 	}
 
@@ -43,7 +43,7 @@ func PostTeam(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		app.Fail("Unable to parse ID")
-		http.Redirect(w, r, "/kushtaka/teams/page/1/limit/100", 301)
+		http.Redirect(w, r, "/kushtaka/teams/page/1/limit/100", 302)
 		return
 	}
 
@@ -51,7 +51,7 @@ func PostTeam(w http.ResponseWriter, r *http.Request) {
 	err = app.DB.One("ID", id, team)
 	if err != nil {
 		app.Fail("Team does not exist. " + err.Error())
-		http.Redirect(w, r, "/kushtaka/teams/page/1/limit/100", 301)
+		http.Redirect(w, r, "/kushtaka/teams/page/1/limit/100", 302)
 		return
 	}
 
@@ -60,14 +60,14 @@ func PostTeam(w http.ResponseWriter, r *http.Request) {
 	app.View.Forms.TeamMember = team
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, url, 301)
+		http.Redirect(w, r, url, 302)
 		return
 	}
 
 	tx, err := app.DB.Begin(true)
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, url, 301)
+		http.Redirect(w, r, url, 302)
 		return
 	}
 	team.MemberToAdd = ""
@@ -75,20 +75,20 @@ func PostTeam(w http.ResponseWriter, r *http.Request) {
 	err = tx.Save(team)
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, url, 301)
+		http.Redirect(w, r, url, 302)
 		return
 	}
 
 	err = tx.Commit()
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, "/kushtaka/dashboard", 301)
+		http.Redirect(w, r, "/kushtaka/dashboard", 302)
 		return
 	}
 
 	app.View.Forms = state.NewForms()
 	app.Success("Member has been successfully added to the team.")
-	http.Redirect(w, r, url, 301)
+	http.Redirect(w, r, url, 302)
 	return
 }
 

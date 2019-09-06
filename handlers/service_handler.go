@@ -6,14 +6,9 @@ import (
 	"net/http"
 
 	"github.com/kushtaka/kushtakad/models"
+	"github.com/kushtaka/kushtakad/service/telnet"
 	"github.com/kushtaka/kushtakad/state"
 )
-
-// {sensorId: 1, type: serviceType, port: 23, emulate: 'basic'}
-type Service struct {
-	SensorID int64  `json:"sensorId"`
-	Type     string `json:"type"`
-}
 
 func PostService(w http.ResponseWriter, r *http.Request) {
 	app, err := state.Restore(r)
@@ -22,37 +17,63 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 	}
 
 	decoder := json.NewDecoder(r.Body)
-	var t Service
-	err = decoder.Decode(&t)
+	var cfg models.ServiceCfg
+	err = decoder.Decode(&cfg)
 	if err != nil {
 		panic(err)
 	}
-	log.Println(t)
 
-	js, err := json.Marshal(t)
+	js, err := json.Marshal(cfg)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
 	tx, err := app.DB.Begin(true)
 	if err != nil {
 		tx.Rollback()
-		log.Println(err)
+		log.Println("can't begin ", err)
 		return
 	}
 
 	var sensor models.Sensor
-	tx.One("ID", t.SensorID, sensor)
+	tx.One("ID", cfg.SensorID, &sensor)
 	if sensor.ID == 0 {
 		tx.Rollback()
-		log.Println(err)
+		log.Println("zero sensor id ", err)
 		return
 	}
 
-	err = tx.Update(sensor)
+	var serviceID int64
+	switch cfg.Type {
+	case "telnet":
+		tel := telnet.TelnetService{
+			SensorID: cfg.SensorID,
+			Port:     21,
+			Prompt:   "$",
+			Emulate:  "basic",
+			Type:     "telnet",
+		}
+
+		err = tx.Save(&tel)
+		if err != nil {
+			tx.Rollback()
+			log.Println(err)
+			return
+		}
+
+		serviceID = tel.ID
+		log.Println("Service ID ", serviceID)
+
+	default:
+		tx.Rollback()
+		log.Println("unable to find service type")
+		return
+	}
+
+	cfg.ServiceID = serviceID
+	cfg.SensorID = sensor.ID
+	err = tx.Save(&cfg)
 	if err != nil {
 		tx.Rollback()
 		log.Println(err)
@@ -66,4 +87,6 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 }

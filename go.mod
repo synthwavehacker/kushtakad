@@ -7,6 +7,7 @@ require (
 	github.com/Sereal/Sereal v0.0.0-20190618215532-0b8ac451a863 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
 	github.com/asdine/storm v2.1.2+incompatible
+	github.com/br0xen/boltbrowser v0.0.0-20190218150438-8c302bd236f0 // indirect
 	github.com/fatih/color v1.7.0
 	github.com/go-acme/lego v2.7.2+incompatible // indirect
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible

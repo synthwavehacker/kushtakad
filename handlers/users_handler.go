@@ -41,7 +41,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	err = app.DB.All(&users)
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 301)
+		http.Redirect(w, r, redirUrl, 302)
 		return
 	}
 
@@ -68,7 +68,7 @@ func PostUsers(w http.ResponseWriter, r *http.Request) {
 	app.View.Forms.User = user
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, redir, 301)
+		http.Redirect(w, r, redir, 302)
 		return
 	}
 
@@ -77,26 +77,26 @@ func PostUsers(w http.ResponseWriter, r *http.Request) {
 	tx, err := app.DB.Begin(true)
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, redir, 301)
+		http.Redirect(w, r, redir, 302)
 		return
 	}
 
 	err = tx.Save(user)
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, redir, 301)
+		http.Redirect(w, r, redir, 302)
 		return
 	}
 
 	err = tx.Commit()
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, redir, 301)
+		http.Redirect(w, r, redir, 302)
 		return
 	}
 
 	app.View.Forms = state.NewForms()
 	app.Success("User created successfully")
-	http.Redirect(w, r, redir, 301)
+	http.Redirect(w, r, redir, 302)
 	return
 }

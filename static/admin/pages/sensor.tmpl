@@ -26,10 +26,10 @@
     </div>
 
     <div class="col s12 m8 l8">
-        {{ if len .Sensor.Services }}
-            {{ range $key, $service := .Sensor.Services }}
+        {{ if len .SensorServices }}
+            {{ range $key, $service := .SensorServices }}
                 <div class="marjen valign-wrapper z-depth-1">
-                    <h6><a class="tealo" href="/kushtaka/sensor/{{ $service.Type }}">{{ $service.Type }}</a></h6>
+                    <h6><a class="tealo" href="/kushtaka/sensor/{{ $service.ID }}">Type {{ $service.Type }} / Port {{ $service.Port }}</a></h6>
                 </div>
             {{ end }}
         {{ end }}

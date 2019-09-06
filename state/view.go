@@ -22,6 +22,7 @@ type View struct {
 	Sensor       *models.Sensor
 	Sensors      []models.Sensor
 	Users        []models.User
+	SensorServices []models.Service
 }
 
 type Links struct {

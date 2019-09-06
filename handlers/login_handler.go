@@ -16,7 +16,7 @@ func GetLogin(w http.ResponseWriter, r *http.Request) {
 
 	if app.View.State.IsAuthd {
 		app.Fail("You are already authenticated.")
-		http.Redirect(w, r, "/kushtaka/dashboard", 301)
+		http.Redirect(w, r, "/kushtaka/dashboard", 302)
 		return
 	}
 
@@ -32,7 +32,7 @@ func PostLogin(w http.ResponseWriter, r *http.Request) {
 
 	if app.View.State.IsAuthd {
 		app.Fail("You are already authenticated.")
-		http.Redirect(w, r, "/kushtaka/dashboard", 301)
+		http.Redirect(w, r, "/kushtaka/dashboard", 302)
 		return
 	}
 
@@ -45,7 +45,7 @@ func PostLogin(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, "/setup", 301)
+		http.Redirect(w, r, "/setup", 302)
 		return
 	}
 
@@ -53,20 +53,20 @@ func PostLogin(w http.ResponseWriter, r *http.Request) {
 	err = app.DB.One("Email", extUser.Email, user)
 	if err != nil {
 		app.Fail("User is not found.")
-		http.Redirect(w, r, "/login", 301)
+		http.Redirect(w, r, "/login", 302)
 		return
 	}
 
 	err = user.Authenticate(extUser.Password)
 	if err != nil {
 		app.Fail("User or password is incorrect.")
-		http.Redirect(w, r, "/login", 301)
+		http.Redirect(w, r, "/login", 302)
 		return
 	}
 
 	app.User = user
 	app.Success("You have successfully logged in.")
-	http.Redirect(w, r, "/kushtaka/dashboard", 301)
+	http.Redirect(w, r, "/kushtaka/dashboard", 302)
 	return
 }
 

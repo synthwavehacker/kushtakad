@@ -22,7 +22,7 @@ func GetTeams(w http.ResponseWriter, r *http.Request) {
 	err = app.DB.All(&teams)
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 301)
+		http.Redirect(w, r, redirUrl, 302)
 		return
 	}
 
@@ -44,14 +44,14 @@ func PostTeams(w http.ResponseWriter, r *http.Request) {
 	err = team.ValidateCreate()
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 301)
+		http.Redirect(w, r, redirUrl, 302)
 		return
 	}
 
 	tx, err := app.DB.Begin(true)
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 301)
+		http.Redirect(w, r, redirUrl, 302)
 		return
 	}
 
@@ -59,7 +59,7 @@ func PostTeams(w http.ResponseWriter, r *http.Request) {
 	if team.ID > 0 {
 		tx.Rollback()
 		app.Fail("Team using that name already exists.")
-		http.Redirect(w, r, redirUrl, 301)
+		http.Redirect(w, r, redirUrl, 302)
 		return
 	}
 
@@ -67,7 +67,7 @@ func PostTeams(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		tx.Rollback()
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 301)
+		http.Redirect(w, r, redirUrl, 302)
 		return
 	}
 
@@ -75,12 +75,12 @@ func PostTeams(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		tx.Rollback()
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 301)
+		http.Redirect(w, r, redirUrl, 302)
 		return
 	}
 
 	app.View.Forms.Team = models.NewTeam()
 	app.Success(fmt.Sprintf("The team [%s] was created successfully.", name))
-	http.Redirect(w, r, redirUrl, 301)
+	http.Redirect(w, r, redirUrl, 302)
 	return
 }

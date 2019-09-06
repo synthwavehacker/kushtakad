@@ -7,6 +7,7 @@ import (
 	"io"
 	"net"
 	"strings"
+	"sync"
 
 	validation "github.com/go-ozzo/ozzo-validation"
 )
@@ -15,7 +16,16 @@ type Sensor struct {
 	ID       int64  `storm:"id,increment,index"`
 	Name     string `storm:"index,unique" json:"name"`
 	ApiKey   string `storm:"index,unique" json:"api_key"`
-	Services []Service
+
+	mu sync.Mutex
+}
+
+// {sensorId: 1, type: serviceType, port: 23, emulate: 'basic'}
+type ServiceCfg struct {
+	ID       	int64  `storm:"id,increment,index"`
+	SensorID 	int64  `storm:"index" json:"sensorId"`
+	ServiceID 	int64  `storm:"index" json:"serviceId"`
+	Type     	string `json:"type"`
 }
 
 type Service interface {

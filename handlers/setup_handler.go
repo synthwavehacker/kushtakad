@@ -16,7 +16,7 @@ func GetSetup(w http.ResponseWriter, r *http.Request) {
 
 	if app.View.State.AdminIsSetup {
 		app.Fail("This application already has an admin user.")
-		http.Redirect(w, r, "/login", 301)
+		http.Redirect(w, r, "/login", 302)
 		return
 	}
 
@@ -45,7 +45,7 @@ func PostSetup(w http.ResponseWriter, r *http.Request) {
 
 	if app.View.State.AdminIsSetup {
 		app.Fail("This application already has an admin user.")
-		http.Redirect(w, r, "/login", 301)
+		http.Redirect(w, r, "/login", 302)
 		return
 	}
 
@@ -59,7 +59,7 @@ func PostSetup(w http.ResponseWriter, r *http.Request) {
 	app.View.Forms.Setup = user
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, "/setup", 301)
+		http.Redirect(w, r, "/setup", 302)
 		return
 	}
 
@@ -68,14 +68,14 @@ func PostSetup(w http.ResponseWriter, r *http.Request) {
 	tx, err := app.DB.Begin(true)
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, "/setup", 301)
+		http.Redirect(w, r, "/setup", 302)
 		return
 	}
 
 	err = tx.Save(user)
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, "/setup", 301)
+		http.Redirect(w, r, "/setup", 302)
 		return
 	}
 
@@ -86,18 +86,18 @@ func PostSetup(w http.ResponseWriter, r *http.Request) {
 	err = tx.Save(team)
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, "/setup", 301)
+		http.Redirect(w, r, "/setup", 302)
 		return
 	}
 
 	err = tx.Commit()
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, "/setup", 301)
+		http.Redirect(w, r, "/setup", 302)
 		return
 	}
 
 	app.Success("Admin user created successfully, please login.")
-	http.Redirect(w, r, "/login", 301)
+	http.Redirect(w, r, "/login", 302)
 	return
 }
