@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
+	"github.com/gorilla/mux"
 	"github.com/kushtaka/kushtakad/models"
 	"github.com/kushtaka/kushtakad/service/telnet"
 	"github.com/kushtaka/kushtakad/state"
@@ -16,17 +18,13 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	decoder := json.NewDecoder(r.Body)
-	var cfg models.ServiceCfg
-	err = decoder.Decode(&cfg)
+	var js []byte
+	vars := mux.Vars(r)
+	serviceType := vars["type"]
+	sensorId, err := strconv.Atoi(vars["sensor_id"])
 	if err != nil {
-		panic(err)
-	}
+		log.Fatal(err)
 
-	js, err := json.Marshal(cfg)
-	if err != nil {
-		log.Println(err)
-		return
 	}
 
 	tx, err := app.DB.Begin(true)
@@ -37,23 +35,24 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var sensor models.Sensor
-	tx.One("ID", cfg.SensorID, &sensor)
+	tx.One("ID", sensorId, &sensor)
 	if sensor.ID == 0 {
 		tx.Rollback()
 		log.Println("zero sensor id ", err)
 		return
 	}
 
-	var serviceID int64
-	switch cfg.Type {
+	cfg := models.ServiceCfg{}
+	switch serviceType {
 	case "telnet":
-		tel := telnet.TelnetService{
-			SensorID: cfg.SensorID,
-			Port:     21,
-			Prompt:   "$",
-			Emulate:  "basic",
-			Type:     "telnet",
+		decoder := json.NewDecoder(r.Body)
+		var tel telnet.TelnetService
+		err = decoder.Decode(&tel)
+		if err != nil {
+			panic(err)
 		}
+
+		tel.Prompt = "$ "
 
 		err = tx.Save(&tel)
 		if err != nil {
@@ -62,8 +61,26 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		serviceID = tel.ID
-		log.Println("Service ID ", serviceID)
+		js, err = json.Marshal(tel)
+		if err != nil {
+			tx.Rollback()
+			log.Println(err)
+			return
+		}
+
+		cfg.ServiceID = tel.ID
+		cfg.SensorID = sensor.ID
+		cfg.Type = serviceType
+		cfg.Port = tel.Port
+
+		for _, v := range sensor.Cfgs {
+			if v.Port == tel.Port {
+				tx.Rollback()
+				log.Println("Port is already assigned to another service", err)
+			}
+		}
+
+		sensor.Cfgs = append(sensor.Cfgs, cfg)
 
 	default:
 		tx.Rollback()
@@ -71,9 +88,14 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cfg.ServiceID = serviceID
-	cfg.SensorID = sensor.ID
 	err = tx.Save(&cfg)
+	if err != nil {
+		tx.Rollback()
+		log.Println(err)
+		return
+	}
+
+	err = tx.Update(&sensor)
 	if err != nil {
 		tx.Rollback()
 		log.Println(err)

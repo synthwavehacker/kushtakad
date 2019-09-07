@@ -27,6 +27,7 @@ func GetTokens(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.View.Tokens = tokens
+	app.View.AddCrumb("Tokens", "#")
 	app.View.Links.Tokens = "active"
 	app.Render.HTML(w, http.StatusOK, "admin/pages/tokens", app.View)
 	return

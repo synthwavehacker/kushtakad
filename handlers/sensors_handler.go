@@ -8,8 +8,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/kushtaka/kushtakad/models"
-	"github.com/kushtaka/kushtakad/state"
 	"github.com/kushtaka/kushtakad/service/telnet"
+	"github.com/kushtaka/kushtakad/state"
 )
 
 func GetSensor(w http.ResponseWriter, r *http.Request) {
@@ -31,19 +31,14 @@ func GetSensor(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println(sensor)
 
-
-	var scfg []models.ServiceCfg
-	// don't error chk, if no services found, none exist
-	app.DB.Find("SensorID", sensor.ID, &scfg)
-
-	for _, v := range scfg {
+	for _, v := range sensor.Cfgs {
 		switch v.Type {
 		case "telnet":
 			var tel telnet.TelnetService
 			app.DB.One("ID", v.ServiceID, &tel)
-			app.View.SensorServices = append(app.View.SensorServices, tel) 
+			app.View.SensorServices = append(app.View.SensorServices, tel)
 		}
-	} 
+	}
 
 	app.View.Links.Sensors = "active"
 	app.View.Sensor = sensor

@@ -13,19 +13,20 @@ import (
 )
 
 type Sensor struct {
-	ID       int64  `storm:"id,increment,index"`
-	Name     string `storm:"index,unique" json:"name"`
-	ApiKey   string `storm:"index,unique" json:"api_key"`
-
-	mu sync.Mutex
+	ID     int64        `storm:"id,increment,index"`
+	Name   string       `storm:"index,unique" json:"name"`
+	ApiKey string       `storm:"index,unique" json:"api_key"`
+	Cfgs   []ServiceCfg `json:"service_configs`
+	mu     sync.Mutex
 }
 
 // {sensorId: 1, type: serviceType, port: 23, emulate: 'basic'}
 type ServiceCfg struct {
-	ID       	int64  `storm:"id,increment,index"`
-	SensorID 	int64  `storm:"index" json:"sensorId"`
-	ServiceID 	int64  `storm:"index" json:"serviceId"`
-	Type     	string `json:"type"`
+	ID        int64  `storm:"id,increment,index"`
+	SensorID  int64  `storm:"index" json:"sensorId"`
+	ServiceID int64  `storm:"index" json:"serviceId"`
+	Port      int    `storm:"index" json:"port"`
+	Type      string `json:"type"`
 }
 
 type Service interface {

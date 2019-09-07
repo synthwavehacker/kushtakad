@@ -1,4 +1,6 @@
 <div class="row">
+    <h1>{{ .Sensor.Name }}</h1>
+    <h1>{{ .Sensor.ApiKey }}</h1>
     <div class="tform z-depth-1 col s12 m4 l4">
 
         <div class="row">
@@ -31,17 +33,19 @@
                 <table class="striped">
                     <thead>
                         <tr>
-                            <th>Type</th>
                             <th>Port</th>
-                            <th>Action</th>
+                            <th>Type</th>
+                            <th>Update</th>
+                            <th>Delete</th>
                         </tr>
                     </thead>
                     <tbody>
                     {{ range $key, $service := .SensorServices }}
                             <tr>
-                                <td>{{ $service.Type }}</td>
                                 <td>{{ $service.Port }}</td>
-                                <td>Delete</td>
+                                <td>{{ $service.Type }}</td>
+                                <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick="updateServiceModal({ serviceID: {{ $service.ID }}, port: {{ $service.Port }}, type: {{ $service.Type }} } )"><i class="material-icons">settings</i></a></td>
+                                <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick="deleteServiceModal({ serviceID: {{ $service.ID }}, port: {{ $service.Port }}, type: {{ $service.Type }} } )"><i class="material-icons">delete_sweep</i></a></td>
                             </tr>
                     {{ end }}
                     </tbody>
@@ -51,7 +55,6 @@
     </div>
 
     <input hidden id="sensor_id" type="text" name="sensor_id" value="{{ .Sensor.ID }}" disabled class="validate">
-    <input hidden id="type" type="text" name="type" value="telnet" disabled class="validate">
 
     <!-- Telnet Modal Structures -->
     <div id="telnet-modal" class="modal-gap modal">
@@ -63,33 +66,41 @@
 
                 <div class="row">
                     <div class="input-field col s2">
-                        <input id="telnet-port" type="text" name="port" value="" required class="validate">
-                        <label for="port" data-error="example: telnet, ssh, ftp" data-success="valid">Port</label>
+                        <input id="telnet-port" type="text" name="telnet-port" value="" required class="validate">
+                        <label for="telnet-port" data-error="example: telnet, ssh, ftp" data-success="valid">Port</label>
                     </div>
                 </div>
         
                 <div class="row">
                     <div class="input-field col">
-                        <select name="telnet-emulate">
+                        <select id="telnet-emulate" name="telnet-emulate">
                             <option value="" disabled selected>---</option>
-                            <option value="telnet">Telnet</option>
+                            <option value="basic">basic</option>
                         </select>
-                        <label for="emulate" data-error="example: telnet, ssh, ftp" data-success="valid">What kind of telnet server should we emulate?</label>
+                        <label for="emulate" data-error="example: Basic, Complex" data-success="valid">What kind of telnet server should we emulate?</label>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="input-field col">
-                        <button onclick="postData('telnet')" class="waves-effect waves-light teal lighten-1 btn">Submit</button>
+                        <button onclick="post('telnet')" class="waves-effect waves-light teal lighten-1 btn">Submit</button>
                     </div>
                 </div>
 
         </div>
     </div>
+
+    <div id="delete-service-modal" class="modal-gap modal">
+        <div class="modal-content">
+        </div>
+    </div>
+
 </div>
 
 <script>
 
+
+    var uri = "http://localhost:3000/kushtaka/service/";
 
     document.addEventListener('DOMContentLoaded', function() {
         var elems = document.querySelectorAll('.modal');
@@ -111,11 +122,38 @@
         instance.open();
     }
 
-    function postData(serviceType) {
-        console.log(serviceType)
-        var url = 'http://localhost:3000/kushtaka/service';
-        var data = {sensorId: 1, type: serviceType, port: 23, emulate: 'basic'};
+    function deleteServiceModal(id) {
+        var modalElement = document.getElementById("delete-service-modal");
+        var instance = M.Modal.getInstance(modalElement);
+        instance.open();
 
+    }
+
+    function post(type) {
+        if (type == "telnet") {
+            postTelnet(type);
+        }
+    }
+
+    function postTelnet(type) {
+        var sid = parseInt(document.getElementById("sensor_id").value);
+        var telp = parseInt(document.getElementById("telnet-port").value);
+        var el = document.getElementById("telnet-emulate");
+        var telem = el.options[el.selectedIndex].value;
+        var url = uri + sid + "/type/telnet";
+        var data = {sensorId: sid , type: type, port: telp, emulate: telem};
+        postData(data, url);
+    }
+
+    function respTelnet(resp) {
+        console.log('Success:', JSON.stringify(resp));
+    }
+
+    function errc(err) {
+        console.error('Error:', err);
+    }
+
+    function postData(data, url, type) {
         fetch(url, {
         method: 'POST', // or 'PUT'
         body: JSON.stringify(data), // data can be `string` or {object}!
@@ -123,8 +161,8 @@
             'Content-Type': 'application/json'
         }
         }).then(res => res.json())
-        .then(response => console.log('Success:', JSON.stringify(response)))
-        .catch(error => console.error('Error:', error));
+        .then(response => respTelnet(response))
+        .catch(error => errc(error));
     }
 
 </script>

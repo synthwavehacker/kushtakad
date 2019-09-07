@@ -46,7 +46,7 @@ type TelnetService struct {
 	Port     int    `json:"port"`
 	Prompt   string `json:"prompt"`
 	Emulate  string `json:"emulate"`
-	Type     string `json:"index"`
+	Type     string `json:"type"`
 }
 
 func (s TelnetService) Handle(ctx context.Context, conn net.Conn) error {

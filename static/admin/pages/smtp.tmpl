@@ -8,41 +8,31 @@
             </div>
 
             <div class="row">
-                <div class="input-field col s12 m12 112">
+                <div class="input-field col s12 m6 16">
                     <input id="sender" type="text" name="sender" value="{{ .Forms.Smtp.Sender }}">
-                    <label for="sender" data-error="example: Admin" data-success="valid">Sender</label>
+                    <label for="sender" data-error="example: Admin" data-success="valid">Sender's Name</label>
                 </div>
-            </div>
 
-            <div class="row">
-                <div class="input-field col s12 m12 112">
+                <div class="input-field col s12 m6 16">
                     <input id="email" type="email" name="email" class="validate" value="{{ .Forms.Smtp.Email }}">
                     <label for="email">Email</label>
                 </div>
-            </div>
 
-            <div class="row">
-                <div class="input-field col s12 m12 112">
+                <div class="input-field col s12 m9 19">
                     <input id="host" type="text" name="host" value="{{ .Forms.Smtp.Host }}">
                     <label for="host" data-error="example: kushtaka.example.com" data-success="valid">Host</label>
                 </div>
-            </div>
 
-            <div class="row">
-                <div class="input-field col s12 m12 112">
+                <div class="input-field col s12 m3 13">
                     <input id="port" type="text" name="port" value="{{ .Forms.Smtp.Port }}">
                     <label for="port" data-error="example: kushtaka.example.com" data-success="valid">Port</label>
                 </div>
-            </div>
 
-            <div class="row">
                 <div class="input-field col s12 m12 112">
                     <input id="username" type="text" name="username" value="{{ .Forms.Smtp.Username }}">
                     <label for="username" data-error="required: 12 characters" data-success="valid">Username</label>
                 </div>
-            </div>
 
-            <div class="row">
                 <div class="input-field col s12 m12 112">
                     <input id="password" type="text" name="password" value="{{ .Forms.Smtp.Password }}">
                     <label for="password" data-error="required: 12 characters" data-success="valid">Password</label>
@@ -50,8 +40,9 @@
             </div>
 
             <div class="row">
-                <div class="col s12 m8 13">
+                <div class="col s12 m8 18">
                     <button class="waves-effect waves-light teal lighten-1 btn">Save</button>
+                    <a id="send-test" onclick="sendTest()" class="waves-effect waves-light lighten-1 btn">Send Test <i class="material-icons right">send</i></a>
                 </div>
             </div>
 
@@ -59,3 +50,53 @@
     </div>
 </div>
 <div class="col s12 m3 l3"></div>
+
+
+<script>
+
+
+    $(document).ready(function(){
+        checkFill();
+        document.addEventListener('keydown', checkFill);
+    });
+
+
+    function formFilled() {
+
+        var isFilled = true;
+
+        var form = {
+            email: document.getElementById("email").value,
+            send: document.getElementById("sender").value,
+            host: document.getElementById("host").value,
+            port: parseInt(document.getElementById("port").value),
+            username: document.getElementById("username").value,
+            password: document.getElementById("password").value
+        };
+
+
+       for (var key in form) {
+        if (form[key].length === 0) {
+            isFilled = false
+        }
+       };
+
+       return isFilled
+    }
+
+    function checkFill() {
+        var cont = "send-test";
+        var color = "teal";
+        if (formFilled()) {
+            var st = document.getElementById(cont);
+            st.classList.remove("disabled");
+            st.classList.add(color);
+        } else {
+            var st = document.getElementById(cont);
+            st.disabled = true;
+            st.classList.add("disabled");
+            st.classList.remove(color);
+        }
+    }
+
+</script>

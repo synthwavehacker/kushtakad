@@ -46,6 +46,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.View.Users = users
+	app.View.AddCrumb("Users", "#")
 	app.View.Links.Users = "active"
 	app.Render.HTML(w, http.StatusOK, "admin/pages/users", app.View)
 	return

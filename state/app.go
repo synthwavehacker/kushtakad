@@ -3,10 +3,13 @@ package state
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/asdine/storm"
 	packr "github.com/gobuffalo/packr/v2"
@@ -35,10 +38,24 @@ type App struct {
 	Render    *render.Render
 }
 
+func tmplFuncs() []template.FuncMap {
+	funks := []template.FuncMap{}
+	var fns = template.FuncMap{
+		"plus1": func(x int) int {
+			return x + 1
+		},
+		"date": func(d time.Time) string {
+			dt := fmt.Sprintf("%v-%v-%v", d.Year(), d.Month(), d.Day())
+			log.Println(dt)
+			return dt
+		},
+	}
+	funks = append(funks, fns)
+	return funks
+}
 func NewRender(layout string, box *packr.Box) *render.Render {
 	dummyDir := "__DUM__"
 	return render.New(render.Options{
-		Directory: dummyDir, // Specify what path to load the templates from.
 		Asset: func(name string) ([]byte, error) {
 			name = strings.TrimPrefix(name, dummyDir)
 			name = strings.TrimPrefix(name, "/")
@@ -52,6 +69,8 @@ func NewRender(layout string, box *packr.Box) *render.Render {
 			}
 			return names
 		},
+		Funcs:           tmplFuncs(),
+		Directory:       dummyDir, // Specify what path to load the templates from.
 		Extensions:      []string{".tmpl", ".html"},
 		Layout:          layout, // Specify a layout template. Layouts can call {{ yield }} to render the current template or {{ partial "css" }} to render a partial from the current template.
 		RequirePartials: true,   // Return an error if a template is missing a partial used in a layout.
@@ -87,9 +106,9 @@ func (app *App) NotFound(msg string, err error) {
 	log.Println(msg, err)
 	ren := render.New(render.Options{
 		Extensions:      []string{".tmpl", ".html"},
-		Directory:       "static",                 // Specify what path to load the templates from.
+		Directory:       "static",               // Specify what path to load the templates from.
 		Layout:          "admin/layouts/center", // Specify a layout template. Layouts can call {{ yield }} to render the current template or {{ partial "css" }} to render a partial from the current template.
-		RequirePartials: true,                     // Return an error if a template is missing a partial used in a layout.
+		RequirePartials: true,                   // Return an error if a template is missing a partial used in a layout.
 	})
 	ren.HTML(app.Response, http.StatusNotFound, "admin/pages/404", app.View)
 }
