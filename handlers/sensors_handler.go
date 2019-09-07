@@ -41,6 +41,8 @@ func GetSensor(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.View.Links.Sensors = "active"
+	app.View.AddCrumb("Sensors", "/kushtaka/sensors/page/1/limit/100")
+	app.View.AddCrumb(sensor.Name, "#")
 	app.View.Sensor = sensor
 	app.Render.HTML(w, http.StatusOK, "admin/pages/sensor", app.View)
 	return
@@ -80,6 +82,7 @@ func GetSensors(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.View.Sensors = sensors
+	app.View.AddCrumb("Sensors", "#")
 	app.Render.HTML(w, http.StatusOK, "admin/pages/sensors", app.View)
 	return
 }
