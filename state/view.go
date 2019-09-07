@@ -39,6 +39,7 @@ type Links struct {
 	Tokens    string
 	Sensors   string
 	Users     string
+	Teams     string
 }
 
 func NewView() *View {

@@ -14,7 +14,7 @@ import (
 
 const (
 	staticDir   = "static"
-	dataDir     = "tdata"
+	dataDir     = "data"
 	imagesDir   = "images"
 	sessionsDir = "sessions"
 	dbFile      = "kushtaka.db"

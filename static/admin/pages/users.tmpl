@@ -1,32 +1,26 @@
 <div class="row">
 
-    <form class="tform z-depth-1 col s12 m4 l4" method="post" action="/kushtaka/users">
+    <div class="col s12 m4 l4">
+
+    <form class="marjen z-depth-1" method="post" action="/kushtaka/users">
         <div class="row">
             <h5 class="col">New User</h5>
         </div>
 
         <div class="row">
-            <div class="input-field col s12 m10 13">
+            <div class="input-field col s12 m12 l12">
                 <input id="email" type="text" name="email" value="{{ .Forms.User.Email }}" required class="validate">
                 <label for="email" data-error="example: jane@example.com" data-success="valid">Email</label>
             </div>
-        </div>
-
-        <div class="row">
-            <div class="input-field col s12 m10 13">
+            <div class="input-field col s12 m12 l12">
                 <input id="password" type="text" name="password" value="{{ .Forms.User.Password }}" required class="validate">
                 <label for="password" data-error="" data-success="valid">Password</label>
             </div>
-        </div>
-
-
-        <div class="row">
-            <div class="input-field col s12 m10 13">
+            <div class="input-field col s12 m12 l12">
               <input id="password_confirm" type="password" name="password_confirm" value="{{ .Forms.User.PasswordConfirm }}"required class="validate" length="64" pattern=".{12,}">
               <label for="password_confirm" data-error="required: 12 characters" data-success="valid">Password Confirm</label>
             </div>
-          </div>
-
+        </div>
 
         <div class="row">
             <div class="input-field col">
@@ -34,6 +28,7 @@
             </div>
         </div>
     </form>
+    </div>
 
     <div class="col s12 m8 l8">
         {{ if len .Users }}

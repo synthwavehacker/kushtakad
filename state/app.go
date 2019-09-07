@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html"
 	"html/template"
-	"log"
 	"net/http"
 	"path"
 	"strings"
@@ -46,8 +46,10 @@ func tmplFuncs() []template.FuncMap {
 		},
 		"date": func(d time.Time) string {
 			dt := fmt.Sprintf("%v-%v-%v", d.Year(), d.Month(), d.Day())
-			log.Println(dt)
 			return dt
+		},
+		"unsafe": func(s string) string {
+			return html.UnescapeString(s)
 		},
 	}
 	funks = append(funks, fns)
@@ -103,7 +105,6 @@ func NewApp(w http.ResponseWriter, r *http.Request, db *storm.DB, sess *sessions
 }
 
 func (app *App) NotFound(msg string, err error) {
-	log.Println(msg, err)
 	ren := render.New(render.Options{
 		Extensions:      []string{".tmpl", ".html"},
 		Directory:       "static",               // Specify what path to load the templates from.

@@ -11,6 +11,7 @@ import (
 )
 
 func GetTeam(w http.ResponseWriter, r *http.Request) {
+	redir := "/kushtaka/teams/page/1/limit/100"
 	app, err := state.Restore(r)
 	if err != nil {
 		log.Println(err)
@@ -23,11 +24,15 @@ func GetTeam(w http.ResponseWriter, r *http.Request) {
 	err = app.DB.One("ID", id, team)
 	if err != nil {
 		app.Fail("Team does not exist")
-		http.Redirect(w, r, "/kushtaka/teams/page/1/limit/100", 302)
+		http.Redirect(w, r, redir, 302)
 		return
 	}
 
 	app.View.Team = team
+
+	app.View.Links.Teams = "active"
+	app.View.AddCrumb("Teams", redir)
+	app.View.AddCrumb(team.Name, "#")
 	app.Render.HTML(w, http.StatusOK, "admin/pages/team", app.View)
 	return
 }

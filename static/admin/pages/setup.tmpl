@@ -6,16 +6,12 @@
               <input id="email" type="email" name="email" value="{{ .Forms.Setup.Email }}" required class="validate">
               <label for="email" data-error="example: potus@whitehouse.gov" data-success="valid">Email</label>
             </div>
-          </div>
-      
-          <div class="row">
+
             <div class="input-field col s12 m10 13">
               <input id="password" type="password" name="password" value="{{ .Forms.Setup.Password }}" required class="validate" length="64" pattern=".{12,}">
               <label for="password" data-error="required: 12 characters" data-success="valid">Password</label>
             </div>
-          </div>
 
-          <div class="row">
             <div class="input-field col s12 m10 13">
               <input id="password_confirm" type="password" name="password_confirm" value="{{ .Forms.Setup.PasswordConfirm }}"required class="validate" length="64" pattern=".{12,}">
               <label for="password_confirm" data-error="required: 12 characters" data-success="valid">Password Confirm</label>

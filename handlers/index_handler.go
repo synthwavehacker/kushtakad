@@ -13,12 +13,8 @@ import (
 )
 
 func IndexCheckr(w http.ResponseWriter, r *http.Request) {
-	app, err := state.Restore(r)
-	if err != nil {
-		log.Println(err)
-	}
-	ren := state.NewRender("admin/layouts/center", app.Box)
-	ren.HTML(w, http.StatusOK, "admin/pages/index", app.View)
+	http.Redirect(w, r, "/login", 302)
+	return
 }
 
 func Asset(w http.ResponseWriter, r *http.Request) {

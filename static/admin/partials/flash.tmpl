@@ -14,7 +14,7 @@
                 <div class="valign center-align">
                   <ul>
                     {{ range $k, $f := .FlashFail }}
-                      <li>{{ $f }}</li>
+                      <li>{{ unsafe $f }}</li>
                     {{ end }}
                   </ul>
                 </div>
@@ -41,7 +41,7 @@
                 <div class="valign center-align">
                   <ul>
                     {{ range $k, $f := .FlashSuccess }}
-                      <li>{{ $f }}</li>
+                      <li>{{ unsafe $f }}</li>
                     {{ end }}
                   </ul>
                 </div>

@@ -1,8 +1,6 @@
 package models
 
 import (
-	"log"
-
 	"github.com/asdine/storm"
 )
 
@@ -35,7 +33,6 @@ func (st *State) isSetup() bool {
 }
 
 func (st *State) isAuthd(u *User) bool {
-	log.Println(u.ID)
 	if u.ID > 0 {
 		return true
 	}

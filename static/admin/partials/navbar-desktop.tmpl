@@ -1,7 +1,7 @@
 {{ define "admin/partials/navbar-desktop" }}
 
     <ul id='settings' class='dropdown-content'>
-        <li><a href="/kushtaka/teams/page/1/limit/10">Teams</a></li>
+        <li><a class="{{ .Links.Teams }}"href="/kushtaka/teams/page/1/limit/10">Teams</a></li>
         <li><a class="{{ .Links.Users }}" href="/kushtaka/users/page/1/limit/10">Users</a></li>
         <li><a href="/kushtaka/https">Https</a></li>
         <li><a href="/kushtaka/smtp">Smtp</a></li>

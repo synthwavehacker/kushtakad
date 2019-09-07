@@ -27,6 +27,7 @@ func GetTeams(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.View.Teams = teams
+	app.View.AddCrumb("Teams", "#")
 	app.Render.HTML(w, http.StatusOK, "admin/pages/teams", app.View)
 	return
 }

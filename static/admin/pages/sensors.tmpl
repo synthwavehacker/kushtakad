@@ -1,32 +1,54 @@
 <div class="row">
 
-    <form class="tform z-depth-1 col s12 m4 l4" method="post" action="/kushtaka/sensors">
-        <div class="row">
-            <h5 class="col">New Sensor</h5>
-        </div>
-
-        <div class="row">
-            <div class="input-field col">
-                <input id="name" type="text" name="name" value="{{ .Forms.Token.Name }}" required class="validate">
-                <label for="name" data-error="example: devops-nyc-01" data-success="valid">Give the sensor a name/tag/ip etc</label>
+    <div class="col s12 m4 l4">
+        <form class="marjen z-depth-1" method="post" action="/kushtaka/sensors">
+            <div class="row">
+                <h5 class="col">Create Sensor</h5>
             </div>
-        </div>
 
-        <div class="row">
-            <div class="input-field col">
-                <button class="waves-effect waves-light teal lighten-1 btn">Create</button>
+            <div class="row">
+                <div class="input-field col">
+                    <input id="name" type="text" name="name" value="{{ .Forms.Token.Name }}" required class="validate">
+                    <label for="name" data-error="example: devops-nyc-01" data-success="valid">Give the sensor a name/tag/ip etc</label>
+                </div>
             </div>
-        </div>
-    </form>
+
+            <div class="row">
+                <div class="input-field col">
+                    <button class="waves-effect waves-light teal lighten-1 btn">Create</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+    <div class="row">
 
     <div class="col s12 m8 l8">
-        {{ if len .Sensors }}
-            {{ range $key, $sensor := .Sensors }}
-                <div class="marjen valign-wrapper z-depth-1">
-                    <h6><a class="tealo" href="/kushtaka/sensor/{{ $sensor.ID}}">{{ $sensor.Name }}</a></h6>
+            {{ if len .Sensors }}
+                <div class="marjen z-depth-1">
+                    <h5>Sensors List</h5>
+                    <table class="striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Update</th>
+                                <th>Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {{ range $key, $sensor := .Sensors }}
+                                <tr>
+                                    <td>{{ $sensor.Name }}</td>
+                                    <td><a class="btn-floating waves-effect waves-light teal lighten-1" href="/kushtaka/sensor/{{ $sensor.ID }}"><i class="material-icons">settings</i></a></td>
+                                    <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick="deleteServiceModal({ serviceID: {{ $sensor.ID }} } )"><i class="material-icons">delete_sweep</i></a></td>
+                                </tr>
+                        {{ end }}
+                        </tbody>
+                    </table>
                 </div>
             {{ end }}
-        {{ end }}
+        </div>
     </div>
 
 </div>

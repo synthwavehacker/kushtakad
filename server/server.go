@@ -219,14 +219,10 @@ func after(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 		log.Fatal(err)
 	}
 
-	//log.Printf("%s\n", userState)
-
 	formState, err := json.Marshal(app.View.Forms)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	//log.Printf("%s\n", formState)
 
 	app.Session.Values[state.UserStateKey] = userState
 	app.Session.Values[state.FormStateKey] = formState

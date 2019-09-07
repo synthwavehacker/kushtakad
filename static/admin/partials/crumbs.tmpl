@@ -5,9 +5,9 @@
     {{ $length := len .Crumbs }}
         {{ range $k, $v := .Crumbs}}
             {{ if eq $length (plus1 $k) }}
-              <a href="#!" class="breadcrumb">{{ $v.Name }}</a>
+              <a href="#!" class="breadcrumb">{{ unsafe $v.Name }}</a>
               {{ else }}
-              <a href="{{ $v.Link }}" class="breadcrumb">{{ $v.Name }}</a>
+              <a href="{{ $v.Link }}" class="breadcrumb">{{ unsafe $v.Name }}</a>
             {{ end }}
     {{ end }}
     </div>

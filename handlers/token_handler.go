@@ -95,6 +95,9 @@ func GetToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.View.Token = token
+	app.View.Links.Tokens = "active"
+	app.View.AddCrumb("Tokens", "/kushtaka/tokens/page/1/limit/100")
+	app.View.AddCrumb(token.Name, "#")
 	app.Render.HTML(w, http.StatusOK, "admin/pages/token", app.View)
 	return
 }
