@@ -32,14 +32,29 @@
 
     <div class="col s12 m8 l8">
         {{ if len .Users }}
-            {{ range $key, $user := .Users }}
-                <div class="marjen valign-wrapper z-depth-1">
-                    <h6><a class="tealo" href="/kushtaka/user/{{ $user.ID }}">{{ $user.Email }}</a></h6>
-                </div>
-            {{ end }}
+            <div class="marjen z-depth-1">
+                <h5>Users List</h5>
+                <table class="striped">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Update</th>
+                            <th>Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {{ range $key, $v := .Users }}
+                            <tr>
+                                <td>{{ $v.Email }}</td>
+                                <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick="updateServiceModal({ ID: {{ $v.ID }} email: {{ $v.Email }} } )"><i class="material-icons">settings</i></a></td>
+                                <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick="deleteServiceModal({ ID: {{ $v.ID }} email: {{ $v.Email }} } )"><i class="material-icons">delete_sweep</i></a></td>
+                            </tr>
+                    {{ end }}
+                    </tbody>
+                </table>
+            </div>
         {{ end }}
     </div>
-
 </div>
 
 <script>
