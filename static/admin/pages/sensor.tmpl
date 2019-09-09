@@ -211,12 +211,14 @@
     }
 
     function addServiceRow(obj) {
+        let json = JSON.stringify(obj);
+        console.log(json);
         let tmpl = `
-            <tr id="service-id-${obj.serviceId}}">
+            <tr id="service-id-${obj.ID}">
                 <td>${obj.port}</td>
                 <td>${obj.type}</td>
-                <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick="updateServiceModal( ${obj} )"><i class="material-icons">input</i></a></td>
-                <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick="deleteServiceModal( ${obj} )"><i class="material-icons">delete_sweep</i></a></td>
+                <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick='updateServiceModal(${json})'><i class="material-icons">input</i></a></td>
+                <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick='deleteServiceModal(${json})'><i class="material-icons">delete_sweep</i></a></td>
             </tr>
         `;
         $('#service-table > tbody:last-child').append(tmpl);

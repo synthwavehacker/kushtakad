@@ -173,7 +173,6 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 			w.Write(resp.JSON())
 			return
 		}
-		resp.Service = &tel
 
 		for _, v := range sensor.Cfgs {
 			if v.Port == tel.Port {
@@ -184,7 +183,6 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		log.Println(tel.ID)
 		cfg.ServiceID = tel.ID
 		cfg.SensorID = sensor.ID
 		cfg.Type = serviceType
@@ -222,6 +220,7 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	resp.Service = &cfg
 	resp.Status = "success"
 	resp.Message = "Service Saved"
 	w.Write(resp.JSON())
