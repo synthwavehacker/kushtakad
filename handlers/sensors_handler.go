@@ -8,7 +8,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/kushtaka/kushtakad/models"
-	"github.com/kushtaka/kushtakad/service/telnet"
 	"github.com/kushtaka/kushtakad/state"
 )
 
@@ -29,21 +28,26 @@ func GetSensor(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, redir, 302)
 		return
 	}
-	log.Println(sensor)
 
 	for _, v := range sensor.Cfgs {
-		switch v.Type {
-		case "telnet":
-			var tel telnet.TelnetService
-			app.DB.One("ID", v.ServiceID, &tel)
-			app.View.SensorServices = append(app.View.SensorServices, tel)
-		}
+		app.View.SensorServices = append(app.View.SensorServices, v)
 	}
+	app.View.Sensor = sensor
+
+	var teams []models.Team
+	err = app.DB.All(&teams)
+	if err != nil {
+		app.Fail(err.Error())
+		http.Redirect(w, r, redir, 302)
+		return
+	}
+	app.View.Teams = teams
+
+	log.Println(teams)
 
 	app.View.Links.Sensors = "active"
 	app.View.AddCrumb("Sensors", "/kushtaka/sensors/page/1/limit/100")
 	app.View.AddCrumb(sensor.Name, "#")
-	app.View.Sensor = sensor
 	app.Render.HTML(w, http.StatusOK, "admin/pages/sensor", app.View)
 	return
 }
@@ -64,7 +68,7 @@ func DeleteSensor(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetSensors(w http.ResponseWriter, r *http.Request) {
-	redirUrl := "/kushtaka/dashboard"
+	redir := "/kushtaka/dashboard"
 	app, err := state.Restore(r)
 	if err != nil {
 		app.Fail(err.Error())
@@ -77,30 +81,47 @@ func GetSensors(w http.ResponseWriter, r *http.Request) {
 	err = app.DB.All(&sensors)
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 302)
+		http.Redirect(w, r, redir, 302)
 		return
 	}
-
 	app.View.Sensors = sensors
+
+	var teams []models.Team
+	err = app.DB.All(&teams)
+	if err != nil {
+		app.Fail(err.Error())
+		http.Redirect(w, r, redir, 302)
+		return
+	}
+	app.View.Teams = teams
+
+	log.Println(teams)
 	app.View.AddCrumb("Sensors", "#")
 	app.Render.HTML(w, http.StatusOK, "admin/pages/sensors", app.View)
 	return
 }
 
 func PostSensors(w http.ResponseWriter, r *http.Request) {
-	redirUrl := "/kushtaka/sensors/page/1/limit/100"
+	redir := "/kushtaka/sensors/page/1/limit/100"
 	app, err := state.Restore(r)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	name := r.FormValue("name")
-	sensor := &models.Sensor{Name: name}
+	tid, err := strconv.ParseInt(r.FormValue("teamId"), 10, 64)
+	if err != nil {
+		app.Fail("Please select a team to notify")
+		http.Redirect(w, r, redir, 302)
+		return
+	}
+
+	sensor := &models.Sensor{Name: name, TeamID: tid}
 	app.View.Forms.Sensor = sensor
 	err = sensor.ValidateCreate()
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 302)
+		http.Redirect(w, r, redir, 302)
 		return
 	}
 
@@ -108,7 +129,7 @@ func PostSensors(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		tx.Rollback()
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 302)
+		http.Redirect(w, r, redir, 302)
 		return
 	}
 
@@ -116,7 +137,7 @@ func PostSensors(w http.ResponseWriter, r *http.Request) {
 	if sensor.ID > 0 {
 		tx.Rollback()
 		app.Fail("Sensor using that name already exists.")
-		http.Redirect(w, r, redirUrl, 302)
+		http.Redirect(w, r, redir, 302)
 		return
 	}
 
@@ -124,7 +145,7 @@ func PostSensors(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		tx.Rollback()
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 302)
+		http.Redirect(w, r, redir, 302)
 		return
 	}
 
@@ -132,12 +153,12 @@ func PostSensors(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		tx.Rollback()
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 302)
+		http.Redirect(w, r, redir, 302)
 		return
 	}
 
 	app.View.Forms = state.NewForms()
 	app.Success(fmt.Sprintf("The sensor [%s] was created successfully.", sensor.Name))
-	http.Redirect(w, r, redirUrl, 302)
+	http.Redirect(w, r, redir, 302)
 	return
 }

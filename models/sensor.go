@@ -14,19 +14,19 @@ import (
 
 type Sensor struct {
 	ID     int64        `storm:"id,increment,index"`
+	TeamID int64        `storm:"id,index"`
 	Name   string       `storm:"index,unique" json:"name"`
 	ApiKey string       `storm:"index,unique" json:"api_key"`
-	Cfgs   []ServiceCfg `json:"service_configs`
+	Cfgs   []ServiceCfg `storm:"index" json:"service_configs`
 	mu     sync.Mutex
 }
 
-// {sensorId: 1, type: serviceType, port: 23, emulate: 'basic'}
 type ServiceCfg struct {
-	ID        int64  `storm:"id,increment,index"`
+	ID        int64  `storm:"id,increment,index" json:"ID"` // we name the ID something different so that a json marshal/unmarshal doesn't accidentally inflate it
 	SensorID  int64  `storm:"index" json:"sensorId"`
 	ServiceID int64  `storm:"index" json:"serviceId"`
 	Port      int    `storm:"index" json:"port"`
-	Type      string `json:"type"`
+	Type      string `storm:"index" json:"type"`
 }
 
 type Service interface {
@@ -55,5 +55,8 @@ func (s *Sensor) ValidateCreate() error {
 			&s.Name,
 			validation.Required,
 			validation.Length(4, 64).Error("must be between 4-64 characters")),
+		"TeamID": validation.Validate(
+			&s.TeamID,
+			validation.Required.Error("is required")),
 	}.Filter()
 }

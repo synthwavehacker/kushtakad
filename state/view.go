@@ -23,7 +23,7 @@ type View struct {
 	Sensor         *models.Sensor
 	Sensors        []models.Sensor
 	Users          []models.User
-	SensorServices []models.Service
+	SensorServices []models.ServiceCfg
 }
 
 type Crumb struct {

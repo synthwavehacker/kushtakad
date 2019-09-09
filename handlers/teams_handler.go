@@ -10,7 +10,7 @@ import (
 )
 
 func GetTeams(w http.ResponseWriter, r *http.Request) {
-	redirUrl := "/kushtaka/dashboard"
+	redir := "/kushtaka/dashboard"
 	app, err := state.Restore(r)
 	if err != nil {
 		app.Fail(err.Error())
@@ -22,18 +22,19 @@ func GetTeams(w http.ResponseWriter, r *http.Request) {
 	err = app.DB.All(&teams)
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 302)
+		http.Redirect(w, r, redir, 302)
 		return
 	}
 
 	app.View.Teams = teams
+	app.View.Links.Teams = "active"
 	app.View.AddCrumb("Teams", "#")
 	app.Render.HTML(w, http.StatusOK, "admin/pages/teams", app.View)
 	return
 }
 
 func PostTeams(w http.ResponseWriter, r *http.Request) {
-	redirUrl := "/kushtaka/teams/page/1/limit/100"
+	redir := "/kushtaka/teams/page/1/limit/100"
 	app, err := state.Restore(r)
 	if err != nil {
 		log.Fatal(err)
@@ -45,14 +46,14 @@ func PostTeams(w http.ResponseWriter, r *http.Request) {
 	err = team.ValidateCreate()
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 302)
+		http.Redirect(w, r, redir, 302)
 		return
 	}
 
 	tx, err := app.DB.Begin(true)
 	if err != nil {
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 302)
+		http.Redirect(w, r, redir, 302)
 		return
 	}
 
@@ -60,7 +61,7 @@ func PostTeams(w http.ResponseWriter, r *http.Request) {
 	if team.ID > 0 {
 		tx.Rollback()
 		app.Fail("Team using that name already exists.")
-		http.Redirect(w, r, redirUrl, 302)
+		http.Redirect(w, r, redir, 302)
 		return
 	}
 
@@ -68,7 +69,7 @@ func PostTeams(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		tx.Rollback()
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 302)
+		http.Redirect(w, r, redir, 302)
 		return
 	}
 
@@ -76,12 +77,12 @@ func PostTeams(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		tx.Rollback()
 		app.Fail(err.Error())
-		http.Redirect(w, r, redirUrl, 302)
+		http.Redirect(w, r, redir, 302)
 		return
 	}
 
 	app.View.Forms.Team = models.NewTeam()
 	app.Success(fmt.Sprintf("The team [%s] was created successfully.", name))
-	http.Redirect(w, r, redirUrl, 302)
+	http.Redirect(w, r, redir, 302)
 	return
 }

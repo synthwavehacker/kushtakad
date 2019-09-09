@@ -88,6 +88,7 @@ func Run() {
 
 	// service
 	kushtaka.HandleFunc("/service/{sensor_id}/type/{type}", handlers.PostService).Methods("POST")
+	kushtaka.HandleFunc("/service", handlers.DeleteService).Methods("DELETE")
 
 	// tokens
 	kushtaka.HandleFunc("/tokens/page/{pid}/limit/{oid}", handlers.GetTokens).Methods("GET")

@@ -32,32 +32,32 @@
     </div>
 
     <div class="col s12 m8 l8">
-            {{ if len .Tokens}}
-                <div class="marjen z-depth-1">
-                    <h5>Tokens List</h5>
-                    <table class="striped">
-                        <thead>
+            <div class="marjen z-depth-1">
+                <h5>Tokens List</h5>
+                <table class="striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Settings</th>
+                            <th>Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {{ if len .Tokens}}
+                    {{ range $key, $v := .Tokens }}
                             <tr>
-                                <th>Name</th>
-                                <th>Type</th>
-                                <th>Update</th>
-                                <th>Delete</th>
+                                <td>{{ $v.Name }}</td>
+                                <td>{{ $v.Type }}</td>
+                                <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick="updateServiceModal({ tokenID: {{ $v.ID }} type: {{ $v.Type }} } )"><i class="material-icons">settings</i></a></td>
+                                <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick="deleteServiceModal({ tokenID: {{ $v.ID }} type: {{ $v.Type }} } )"><i class="material-icons">delete_sweep</i></a></td>
                             </tr>
-                        </thead>
-                        <tbody>
-                        {{ range $key, $v := .Tokens }}
-                                <tr>
-                                    <td>{{ $v.Name }}</td>
-                                    <td>{{ $v.Type }}</td>
-                                    <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick="updateServiceModal({ tokenID: {{ $v.ID }} type: {{ $v.Type }} } )"><i class="material-icons">settings</i></a></td>
-                                    <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick="deleteServiceModal({ tokenID: {{ $v.ID }} type: {{ $v.Type }} } )"><i class="material-icons">delete_sweep</i></a></td>
-                                </tr>
-                        {{ end }}
-                        </tbody>
-                    </table>
-                </div>
-            {{ end }}
-        </div>
+                    {{ end }}
+                    {{ end }}
+                    </tbody>
+                </table>
+            </div>
+    </div>
 
 </div>
 

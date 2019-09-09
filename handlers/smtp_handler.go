@@ -21,6 +21,7 @@ func GetSmtp(w http.ResponseWriter, r *http.Request) {
 
 	}
 
+	app.View.AddCrumb("SMTP", "#")
 	app.Render.HTML(w, http.StatusOK, "admin/pages/smtp", app.View)
 	return
 }
@@ -70,7 +71,7 @@ func PostSmtp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.Success("Smtp saved successfully.")
+	app.Success("SMTP saved successfully.")
 	http.Redirect(w, r, "/kushtaka/smtp", 302)
 	return
 }

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -12,25 +13,128 @@ import (
 	"github.com/kushtaka/kushtakad/state"
 )
 
-func PostService(w http.ResponseWriter, r *http.Request) {
+func DeleteService(w http.ResponseWriter, r *http.Request) {
+	resp := &Response{}
+	w.Header().Set("Content-Type", "application/json")
 	app, err := state.Restore(r)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var js []byte
+	var scfgFinder models.ServiceCfg
+	decoder := json.NewDecoder(r.Body)
+	err = decoder.Decode(&scfgFinder)
+	if err != nil {
+		resp = NewResponse("error", "Unable to decode response body", err)
+		w.Write(resp.JSON())
+	}
+	fmt.Println(scfgFinder.ServiceID)
+
+	tx, err := app.DB.Begin(true)
+	if err != nil {
+		tx.Rollback()
+		resp = NewResponse("error", "Tx can't begin", err)
+		w.Write(resp.JSON())
+		return
+	}
+
+	var scfg models.ServiceCfg
+	err = tx.One("ServiceID", scfgFinder.ServiceID, &scfg)
+	if err != nil {
+		tx.Rollback()
+		resp := NewResponse("error", "Scfg does not exist?", err)
+		w.Write(resp.JSON())
+		return
+	}
+
+	var sensor models.Sensor
+	err = tx.One("ID", scfg.SensorID, &sensor)
+	log.Println(err)
+	if err != nil {
+		tx.Rollback()
+		resp := NewResponse("error", "Sensor id not found, does sensor exist?", err)
+		w.Write(resp.JSON())
+		return
+	}
+
+	for k, v := range sensor.Cfgs {
+		if v.ServiceID == scfg.ServiceID {
+			sensor.Cfgs = append(sensor.Cfgs[:k], sensor.Cfgs[k+1:]...)
+		}
+	}
+
+	err = tx.Update(&sensor)
+	if err != nil {
+		tx.Rollback()
+		resp := NewResponse("error", "Unable to update sensor", err)
+		w.Write(resp.JSON())
+		return
+	}
+
+	switch scfg.Type {
+	case "telnet":
+		var tel telnet.TelnetService
+		err := tx.One("ID", scfg.ServiceID, &tel)
+		if err != nil {
+			tx.Rollback()
+			resp := NewResponse("error", "Unable to find telnet service", err)
+			w.Write(resp.JSON())
+			return
+		}
+
+		err = tx.DeleteStruct(&tel)
+		if err != nil {
+			tx.Rollback()
+			resp := NewResponse("error", "Unable to delete telnet struct", err)
+			w.Write(resp.JSON())
+			return
+		}
+
+		err = tx.DeleteStruct(&scfg)
+		if err != nil {
+			tx.Rollback()
+			resp := NewResponse("error", "Unable to delete ServiceCfg struct", err)
+			w.Write(resp.JSON())
+			return
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		resp := NewResponse("error", "Unable to commit tx", err)
+		w.Write(resp.JSON())
+		return
+	}
+
+	msg := fmt.Sprintf("Successfully delete the [%s] service on port [%d]", scfg.Type, scfg.Port)
+	resp = NewResponse("success", msg, err)
+	w.Write(resp.JSON())
+	return
+}
+
+func PostService(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	app, err := state.Restore(r)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resp := &Response{}
 	vars := mux.Vars(r)
 	serviceType := vars["type"]
 	sensorId, err := strconv.Atoi(vars["sensor_id"])
 	if err != nil {
-		log.Fatal(err)
-
+		resp = NewResponse("error", "Unable to parse sensor id", err)
+		w.Write(resp.JSON())
+		return
 	}
 
 	tx, err := app.DB.Begin(true)
 	if err != nil {
 		tx.Rollback()
-		log.Println("can't begin ", err)
+		resp = NewResponse("error", "Tx can't begin", err)
+		w.Write(resp.JSON())
 		return
 	}
 
@@ -38,7 +142,8 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 	tx.One("ID", sensorId, &sensor)
 	if sensor.ID == 0 {
 		tx.Rollback()
-		log.Println("zero sensor id ", err)
+		resp := NewResponse("error", "Sensor id not found, does sensor exist?", err)
+		w.Write(resp.JSON())
 		return
 	}
 
@@ -49,66 +154,75 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 		var tel telnet.TelnetService
 		err = decoder.Decode(&tel)
 		if err != nil {
-			panic(err)
+			resp = NewResponse("error", "Unable to decode response body", err)
+			w.Write(resp.JSON())
 		}
-
 		tel.Prompt = "$ "
+
+		if tel.Port == 0 {
+			tx.Rollback()
+			resp = NewResponse("error", "Port must be specified", err)
+			w.Write(resp.JSON())
+			return
+		}
 
 		err = tx.Save(&tel)
 		if err != nil {
 			tx.Rollback()
-			log.Println(err)
+			resp = NewResponse("error", "Unable to save telnet service", err)
+			w.Write(resp.JSON())
 			return
 		}
+		resp.Service = &tel
 
-		js, err = json.Marshal(tel)
-		if err != nil {
-			tx.Rollback()
-			log.Println(err)
-			return
+		for _, v := range sensor.Cfgs {
+			if v.Port == tel.Port {
+				tx.Rollback()
+				r := NewResponse("error", "Port is already assigned to another service", err)
+				w.Write(r.JSON())
+				return
+			}
 		}
 
+		log.Println(tel.ID)
 		cfg.ServiceID = tel.ID
 		cfg.SensorID = sensor.ID
 		cfg.Type = serviceType
 		cfg.Port = tel.Port
 
-		for _, v := range sensor.Cfgs {
-			if v.Port == tel.Port {
-				tx.Rollback()
-				log.Println("Port is already assigned to another service", err)
-			}
-		}
-
-		sensor.Cfgs = append(sensor.Cfgs, cfg)
-
 	default:
 		tx.Rollback()
-		log.Println("unable to find service type")
+		resp = NewResponse("error", "unable to find service type", err)
+		w.Write(resp.JSON())
 		return
 	}
 
 	err = tx.Save(&cfg)
 	if err != nil {
 		tx.Rollback()
-		log.Println(err)
+		r := NewResponse("error", "unable to save service configuration", err)
+		w.Write(r.JSON())
 		return
 	}
 
+	sensor.Cfgs = append(sensor.Cfgs, cfg)
 	err = tx.Update(&sensor)
 	if err != nil {
 		tx.Rollback()
-		log.Println(err)
+		r := NewResponse("error", "unable to update sensor", err)
+		w.Write(r.JSON())
 		return
 	}
 
 	err = tx.Commit()
 	if err != nil {
 		tx.Rollback()
-		log.Println(err)
+		r := NewResponse("error", "unable to commit tx", err)
+		w.Write(r.JSON())
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
+	resp.Status = "success"
+	resp.Message = "Service Saved"
+	w.Write(resp.JSON())
 }

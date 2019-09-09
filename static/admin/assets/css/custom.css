@@ -264,23 +264,23 @@ input:not([type]):focus:not([readonly]) + label, input[type="text"]:focus:not([r
 
 .breadcrumb {
   font-size: 14px;
-  color: #04a2c2;
+  color: black;
 }
 
 .breadcrumb:hover {
-  color: #04a2c2;
+  color: #0894b0;
 }
 
 .breadcrumb:last-child {
-  color: #04a2c2;
+  color: black;
 }
 
 .breadcrumb:last-child:hover {
-  color: #04a2c2;
+  color: #0894b0;
 }
 
 .breadcrumb::before {
-  color: #808080b3;
+  color: black;
   font-size: 14px;
   margin-top: 1px;
 }

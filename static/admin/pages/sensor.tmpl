@@ -2,9 +2,8 @@
     
     <div class="col 12 m4 l4">
         <div class="marjen z-depth-1">
-
             <div class="row">
-                <h5>Select Service</h5>
+                <h5>Add Service</h5>
                 <h5>{{ .Sensor.ApiKey }}</h5>
             </div>
 
@@ -17,47 +16,94 @@
                         <option value="ftp">FTP</option>
                         <option value="ssh">SSH</option>
                     </select>
-            </div>
-
-                <div class="input-field col">
-                    <button class="btn-floating btn-large waves-effect waves-light teal lighten-1" onclick="modalPop()">
+                </div>
+                
+                <div class="input-field col s4 m4 l4">
+                    <button class="center aligned btn-floating waves-effect waves-light teal lighten-1" onclick="modalPop()">
                         <i class="material-icons">add</i>
                     </button>
                 </div>
 
             </div>
+
+        </div>
+
+        <br>
+        <div class="divider"></div>
+        <br>
+
+        <div class="marjen z-depth-1">
+            <div class="row">
+                <h5>Assigned Team</h5>
+                <h5>{{ .Sensor.ApiKey }}</h5>
+            </div>
+
+            <div class="row">
+
+                <div class="input-field col s8 m8 l8">
+                    <select id="service-type" name="type">
+                        <option value="{{ .Sensor.TeamID }}" selected>--current team---</option>
+                    </select>
+                </div>
+
+                <div class="input-field col">
+                    <button class="btn-floating waves-effect waves-light teal lighten-1" onclick="modalPop()">
+                        <i class="material-icons">save</i>
+                    </button>
+                </div>
+
+            </div>
+
         </div>
     </div>
 
     <div class="col s12 m8 l8">
-        {{ if len .SensorServices }}
             <div class="marjen z-depth-1">
-                <h5>Select Service</h5>
-                <table class="striped">
+                <h5>Services List</h5>
+                <table id="service-table" class="striped">
                     <thead>
                         <tr>
                             <th>Port</th>
                             <th>Type</th>
-                            <th>Update</th>
+                            <th>Configure</th>
                             <th>Delete</th>
                         </tr>
                     </thead>
-                    <tbody>
-                    {{ range $key, $service := .SensorServices }}
-                            <tr>
+                    <tbody id="services-tbody">
+                    {{ if len .SensorServices }}
+                    {{ range $key, $service := .Sensor.Cfgs }}
+                            <tr id="service-id-{{ $service.ServiceID}}">
                                 <td>{{ $service.Port }}</td>
                                 <td>{{ $service.Type }}</td>
-                                <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick="updateServiceModal({ serviceID: {{ $service.ID }}, port: {{ $service.Port }}, type: {{ $service.Type }} } )"><i class="material-icons">settings</i></a></td>
-                                <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick="deleteServiceModal({ serviceID: {{ $service.ID }}, port: {{ $service.Port }}, type: {{ $service.Type }} } )"><i class="material-icons">delete_sweep</i></a></td>
+                                <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick="updateServiceModal( {{ $service }} )"><i class="material-icons">input</i></a></td>
+                                <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick="deleteServiceModal( {{ $service }} )"><i class="material-icons">delete_sweep</i></a></td>
                             </tr>
+                    {{ end }}
                     {{ end }}
                     </tbody>
                 </table>
             </div>
-        {{ end }}
     </div>
 
     <input hidden id="sensor_id" type="text" name="sensor_id" value="{{ .Sensor.ID }}" disabled class="validate">
+
+    <!-- Delete Modal Structures -->
+    <div id="delete-service-modal" class="modal-gap modal">
+        <div class="modal-content">
+
+                <div class="row">
+                    <h5 class="col">Do you want to delete the following service?</h5>
+                </div>
+
+                <div class="row">
+                    <div class="input-field col">
+                        <button id="delete-service-modal-no"  class="waves-effect waves-light teal lighten-1 btn">Cancel</button>
+                        <button id="delete-service-modal-yes" class="waves-effect waves-light red lighten-1 btn">Delete</button>
+                    </div>
+                </div>
+
+        </div>
+    </div>
 
     <!-- Telnet Modal Structures -->
     <div id="telnet-modal" class="modal-gap modal">
@@ -114,6 +160,18 @@
         $('select').formSelect();
     });
 
+    function cancelDelete(id) {
+        var modalElement = document.getElementById("delete-service-modal");
+        var instance = M.Modal.getInstance(modalElement);
+        instance.close();
+    }
+
+    function deleteService(obj) {
+        deleteData(obj, uri);
+        var id = "service-id-" + obj.serviceId.toString();
+        document.getElementById(id).remove();
+    }
+
 
     function modalPop() {
         var el = document.getElementById("service-type");
@@ -128,6 +186,10 @@
     function deleteServiceModal(id) {
         var modalElement = document.getElementById("delete-service-modal");
         var instance = M.Modal.getInstance(modalElement);
+
+        document.getElementById("delete-service-modal-no").onclick = function() {cancelDelete(id)};
+        document.getElementById("delete-service-modal-yes").onclick = function() { deleteService(id)};
+
         instance.open();
 
     }
@@ -145,14 +207,39 @@
         var telem = el.options[el.selectedIndex].value;
         var url = uri + sid + "/type/telnet";
         var data = {sensorId: sid , type: type, port: telp, emulate: telem};
-        postData(data, url);
+        postData(data, url, type);
+    }
+
+    function addServiceRow(obj) {
+        let tmpl = `
+            <tr id="service-id-${obj.serviceId}}">
+                <td>${obj.port}</td>
+                <td>${obj.type}</td>
+                <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick="updateServiceModal( ${obj} )"><i class="material-icons">input</i></a></td>
+                <td><a class="btn-floating waves-effect waves-light teal lighten-1" onclick="deleteServiceModal( ${obj} )"><i class="material-icons">delete_sweep</i></a></td>
+            </tr>
+        `;
+        $('#service-table > tbody:last-child').append(tmpl);
     }
 
     function respTelnet(resp) {
-        console.log('Success:', JSON.stringify(resp));
+        modalType = "telnet-modal"; 
+        var modalElement = document.getElementById(modalType);
+        var instance = M.Modal.getInstance(modalElement);
+
+        if (resp.Status === "success") {
+            document.getElementById("telnet-port").value = "";
+            document.getElementById("telnet-emulate").selectedIndex = 0; 
+            addServiceRow(resp.Service);
+            M.toast({html: resp.Message , classes: 'green lighten-1'})
+            instance.close();
+        } else {
+            M.toast({html: resp.Message , classes: 'red lighten-1'})
+        }
     }
 
     function errc(err) {
+        M.toast({html: err, classes: 'green lighten-1'})
         console.error('Error:', err);
     }
 
@@ -165,6 +252,30 @@
         }
         }).then(res => res.json())
         .then(response => respTelnet(response))
+        .catch(error => errc(error));
+    }
+
+    function respDeleteService(modalType, resp) {
+        var modalElement = document.getElementById(modalType);
+        var instance = M.Modal.getInstance(modalElement);
+
+        if (resp.Status === "success") {
+            M.toast({html: resp.Message , classes: 'green lighten-1'})
+            instance.close();
+        } else {
+            M.toast({html: resp.Message , classes: 'red lighten-1'})
+        }
+    }
+
+    function deleteData(data, url) {
+        fetch(url, {
+        method: 'DELETE', // or 'PUT'
+        body: JSON.stringify(data), // data can be `string` or {object}!
+        headers:{
+            'Content-Type': 'application/json'
+        }
+        }).then(res => res.json())
+        .then(response => respDeleteService("delete-service-modal", response))
         .catch(error => errc(error));
     }
 
