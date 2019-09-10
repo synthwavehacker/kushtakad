@@ -17,6 +17,7 @@ require (
 	github.com/gorilla/mux v1.7.3
 	github.com/gorilla/securecookie v1.1.1
 	github.com/gorilla/sessions v1.2.0
+	github.com/gorilla/websocket v1.4.1
 	github.com/kushtaka/kushtakas v0.0.0-20190903154744-0892df07c366
 	github.com/microcosm-cc/bluemonday v1.0.2
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646

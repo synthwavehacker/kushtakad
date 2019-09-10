@@ -135,6 +135,10 @@ func Run() {
 		negroni.Wrap(kushtaka),
 	))
 
+	rtr.HandleFunc("/ws", handlers.Ws)
+	
+
+
 	// setup router
 	n := negroni.New()
 	n.Use(negroni.HandlerFunc(before))

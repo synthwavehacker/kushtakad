@@ -36,6 +36,7 @@ type App struct {
 	View      *View
 	User      *models.User
 	Render    *render.Render
+	ServerHub *ServerHub
 }
 
 func tmplFuncs() []template.FuncMap {
@@ -89,7 +90,11 @@ func NewApp(w http.ResponseWriter, r *http.Request, db *storm.DB, sess *sessions
 		return nil, err
 	}
 
+	hub := newServerHub(db)
+	go hub.run()
+
 	return &App{
+		ServerHub: hub,
 		Response:  w,
 		Request:   r,
 		DB:        db,
