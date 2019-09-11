@@ -63,7 +63,7 @@
             "uri": uri
         }
 
-        let url = "http://localhost:3000/mod/endpoint"
+        let url = "{{ .URI }}/mod/endpoint"
         // Default options are marked with *
         return fetch(url, {
             method: "POST", // *GET, POST, PUT, DELETE, etc.

@@ -4,72 +4,82 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"os"
-	"os/signal"
 	"runtime"
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/kushtaka/kushtakas/listener"
+	"github.com/kushtaka/kushtakad/listener"
+	"github.com/kushtaka/kushtakad/service/telnet"
 	"github.com/op/go-logging"
 )
 
 var log = logging.MustGetLogger("sensors")
 
-func Run() {
-	h := &Hub{}
-	ctx, cancel := context.WithCancel(context.Background())
+func configureServices(h *Hub) {
+	tel := telnet.Telnet()
+	sm := &ServiceMap{
+		Service: tel,
+		Name:    "telnet",
+		Type:    "telnet",
+		Port:    "2222",
+	}
 
-	go func() {
-		s := make(chan os.Signal, 1)
-		signal.Notify(s, os.Interrupt)
-		signal.Notify(s, syscall.SIGTERM)
+	addr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort("localhost", "2222"))
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		select {
-		case <-s:
-			cancel()
-		}
-	}()
+	h.ports[addr] = append(h.ports[addr], sm)
+
+}
+
+func startSensor(ctx context.Context) {
+
+	h := &Hub{
+		ports: make(map[net.Addr][]*ServiceMap),
+	}
+
+	configureServices(h)
 
 	incoming := make(chan net.Conn)
 
 	l, err := listener.NewSocket()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	go func() {
 		for {
 			conn, err := l.Accept()
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 
 			incoming <- conn
 
-			// in case of goroutine starvation
-			// with many connection and single procs
-			runtime.Gosched()
+			runtime.Gosched() // in case of goroutine starvation // with many connection and single procs
 		}
 	}()
 
 	err = l.Start(ctx)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case conn := <-incoming:
-			go h.handle(conn)
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case conn := <-incoming:
+				go h.handle(conn)
+			}
 		}
-	}
+	}()
+
 }
 
 func (h *Hub) handle(c net.Conn) {
@@ -104,6 +114,7 @@ type ServiceMap struct {
 
 	Name string
 	Type string
+	Port string
 }
 
 type Servicer interface {
@@ -248,3 +259,122 @@ func compareAddr(addr1 net.Addr, addr2 net.Addr) bool {
 
 	return false
 }
+
+/*
+func (h *Hub) ConfigureListener(ctx context.Context, Type string) listener.Listener {
+	listenerFunc, ok := listener.Get(Type)
+	if !ok {
+		fmt.Println(color.RedString("Listener %s not support on platform", Type))
+		return nil
+	}
+
+	l, err := listenerFunc()
+
+	if err != nil {
+		log.Fatalf("Error initializing listener %s: %s", Type, err)
+	}
+
+	h.ports = make(map[net.Addr][]*ServiceMap)
+	for _, s := range h.config.Ports {
+
+		x := struct {
+			Port     string   `toml:"port"`
+			Ports    []string `toml:"ports"`
+			Services []string `toml:"services"`
+		}{}
+
+		if err := hc.config.PrimitiveDecode(s, &x); err != nil {
+			log.Error("Error parsing configuration of generic ports: %s", err.Error())
+			continue
+		}
+
+		var ports []string
+		if x.Ports != nil {
+			ports = x.Ports
+		}
+		if x.Port != "" {
+			ports = append(ports, x.Port)
+		}
+		if x.Port != "" && x.Ports != nil {
+			log.Warning(`Both "port" and "ports" were defined, this can be confusing`)
+		} else if x.Port == "" && x.Ports == nil {
+			log.Error("Neither \"port\" nor \"ports\" were defined")
+			continue
+		}
+
+		if len(x.Services) == 0 {
+			log.Warning("No services defined for port(s) " + strings.Join(ports, ", "))
+		}
+
+		for _, portStr := range ports {
+			addr, _, _, err := ToAddr(portStr)
+			if err != nil {
+				log.Error("Error parsing port string: %s", err.Error())
+				continue
+			}
+			if addr == nil {
+				log.Error("Failed to bind: addr is nil")
+				continue
+			}
+
+			// Get the services from their names
+			var servicePtrs []*ServiceMap
+			for _, serviceName := range x.Services {
+				ptr, ok := hc.serviceList[serviceName]
+				if !ok {
+					log.Error("Unknown service '%s' for port %s", serviceName, portStr)
+					continue
+				}
+				servicePtrs = append(servicePtrs, ptr)
+				hc.isServiceUsed[serviceName] = true
+			}
+			if len(servicePtrs) == 0 {
+				log.Errorf("Port %s has no valid services, it won't be listened on", portStr)
+				continue
+			}
+
+			found := false
+			for k, _ := range hc.ports {
+				if !compareAddr(k, addr) {
+					continue
+				}
+
+				found = true
+			}
+
+			if found {
+				log.Error("Port %s was already defined, ignoring the newer definition", portStr)
+				continue
+			}
+
+			hc.ports[addr] = servicePtrs
+
+			a, ok := l.(listener.AddAddresser)
+			if !ok {
+				log.Error("Listener error")
+				continue
+			}
+			a.AddAddress(addr)
+
+			log.Infof("Configured port %s/%s", addr.Network(), addr.String())
+		}
+	}
+
+	for name, isUsed := range hc.isServiceUsed {
+		if !isUsed {
+			log.Warningf("Service %s is defined but not used", name)
+		}
+	}
+
+	if len(hc.config.Undecoded()) != 0 {
+		log.Warningf("Unrecognized keys in configuration: %v", hc.config.Undecoded())
+	}
+
+	if err := l.Start(ctx); err != nil {
+		fmt.Println(color.RedString("Error starting listener: %s", err.Error()))
+	}
+
+	return l
+}
+
+*/

@@ -3,7 +3,6 @@ package state
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 

@@ -12,16 +12,8 @@ type Settings struct {
 	SessionHash  []byte `json:"session_hash"`
 	SessionBlock []byte `json:"session_block"`
 	CsrfHash     []byte `json:"csrf_hash"`
-
-	SmtpServer   string `json:"smtp_server"`
-	SmtpUser     string `json:"smtp_user"`
-	SmtpPassword string `json:"smtp_password"`
-	SmtpPort     string `json:"smtp_port"`
-
-	SmtpIsSetup  bool `json:"smtp_is_setup"`
-	AdminIsSetup bool `json:"admin_is_setup"`
-	HttpsIsSetup bool `json:"https_is_setup"`
-	TeamIsSetup  bool `json:"team_is_setup"`
+	Host         string
+	Scheme       string
 }
 
 func InitSettings(db *storm.DB) (Settings, error) {
@@ -37,6 +29,14 @@ func InitSettings(db *storm.DB) (Settings, error) {
 
 	if len(s.CsrfHash) != 32 {
 		s.CsrfHash = securecookie.GenerateRandomKey(32)
+	}
+
+	if len(s.Host) == 0 {
+		s.Host = "localhost:8080"
+	}
+
+	if s.Scheme != "http" || s.Scheme != "https" {
+		s.Scheme = "http"
 	}
 
 	err := db.Save(&s)

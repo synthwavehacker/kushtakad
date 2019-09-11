@@ -5,7 +5,6 @@ package state
 // license that can be found in the LICENSE file.
 
 import (
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -57,7 +56,7 @@ func (c *Client) startReceiver() {
 		err := c.conn.ReadJSON(clientMsg)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("error: %v", err)
+				log.Infof("error: %v", err)
 			}
 			break
 		}
@@ -103,7 +102,7 @@ func (hub *ServerHub) ServeWs(w http.ResponseWriter, r *http.Request) {
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		log.Info(err)
 		return
 	}
 	client := &Client{hub: hub, conn: conn, sender: make(chan *ClientMsg), receiver: make(chan *ClientMsg)}

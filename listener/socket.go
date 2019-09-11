@@ -48,19 +48,23 @@ func NewSocket(options ...func(Listener) error) (Listener, error) {
 	ch := make(chan net.Conn)
 
 	sc := SocketConfig{}
-	addr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort("localhost", "2222"))
-	if err != nil {
-		panic(err)
+	serviceMap := make(map[string]string)
+
+	serviceMap["2222"] = "localhost"
+	serviceMap["2223"] = "localhost"
+
+	for port, host := range serviceMap {
+		addr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort(host, port))
+		if err != nil {
+			panic(err)
+		}
+
+		sc.AddAddress(addr)
 	}
 
-	sc.AddAddress(addr)
 	l := socketListener{
 		SocketConfig: sc,
 		ch:           ch,
-	}
-
-	for _, option := range options {
-		option(&l)
 	}
 
 	return &l, nil

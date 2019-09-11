@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/asdine/storm"
 	packr "github.com/gobuffalo/packr/v2"
@@ -136,8 +135,6 @@ func Run() {
 	))
 
 	rtr.HandleFunc("/ws", handlers.Ws)
-	
-
 
 	// setup router
 	n := negroni.New()
@@ -145,16 +142,7 @@ func Run() {
 	n.UseHandler(rtr)
 	n.Use(negroni.HandlerFunc(after))
 
-	env := os.Getenv("KUSHTAKA_ENV")
-	var host string
-	switch env {
-	case "development":
-		host = "localhost:3001"
-	default:
-		host = "localhost:8080"
-	}
-
-	log.Fatal(http.ListenAndServe(host, n))
+	log.Fatal(http.ListenAndServe(settings.Host, n))
 }
 
 // forceSetup is a middleware function that makes sure
@@ -206,6 +194,7 @@ func before(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	app.RestoreUser()
 	app.RestoreForm()
 	app.RestoreState()
+	app.RestoreURI()
 
 	ctx := context.WithValue(r.Context(), state.AppStateKey, app)
 	next(w, r.WithContext(ctx))

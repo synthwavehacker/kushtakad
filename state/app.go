@@ -7,6 +7,7 @@ import (
 	"html"
 	"html/template"
 	"net/http"
+	"os"
 	"path"
 	"strings"
 	"time"
@@ -15,6 +16,7 @@ import (
 	packr "github.com/gobuffalo/packr/v2"
 	"github.com/gorilla/sessions"
 	"github.com/kushtaka/kushtakad/models"
+	"github.com/op/go-logging"
 	"github.com/unrolled/render"
 )
 
@@ -24,6 +26,8 @@ const UserStateKey = "UserState"
 const FormStateKey = "FormState"
 const FlashFail = "FlashFail"
 const FlashSuccess = "FlashSuccess"
+
+var log = logging.MustGetLogger("state")
 
 type App struct {
 	Response  http.ResponseWriter
@@ -146,6 +150,24 @@ func (app *App) RestoreUser() {
 		app.User = us
 		app.View.User = us
 	}
+}
+
+func (app *App) RestoreURI() {
+	var scheme, host string
+	st, err := models.FindSettings(app.DB)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if os.Getenv("KUSHTAKA_ENV") == "development" {
+		scheme = "http"
+		host = "localhost:3000"
+	} else {
+		scheme = st.Scheme
+		host = st.Host
+	}
+	uri := fmt.Sprintf("%s://%s", scheme, host)
+	app.View.URI = uri
 }
 
 func (app *App) RestoreState() {
