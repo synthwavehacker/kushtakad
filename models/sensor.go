@@ -1,15 +1,17 @@
 package models
 
 import (
-	"context"
 	"crypto/rand"
 	"fmt"
 	"io"
-	"net"
+	"strconv"
 	"strings"
 	"sync"
 
+	"github.com/asdine/storm"
 	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/kushtaka/kushtakad/service"
+	"github.com/kushtaka/kushtakad/service/telnet"
 )
 
 type Sensor struct {
@@ -21,20 +23,8 @@ type Sensor struct {
 	mu     sync.Mutex
 }
 
-type ServiceCfg struct {
-	ID        int64  `storm:"id,increment,index" json:"ID"` // we name the ID something different so that a json marshal/unmarshal doesn't accidentally inflate it
-	SensorID  int64  `storm:"index" json:"sensorId"`
-	ServiceID int64  `storm:"index" json:"serviceId"`
-	Port      int    `storm:"index" json:"port"`
-	Type      string `storm:"index" json:"type"`
-}
-
-type Service interface {
-	Handle(ctx context.Context, conn net.Conn) error
-}
-
-func NewSensor() *Sensor {
-	return &Sensor{ApiKey: GenerateSecureKey()}
+func NewSensor(name string, teamid int64) *Sensor {
+	return &Sensor{Name: name, TeamID: teamid, ApiKey: GenerateSecureKey()}
 }
 
 func GenerateSecureKey() string {
@@ -59,4 +49,25 @@ func (s *Sensor) ValidateCreate() error {
 			&s.TeamID,
 			validation.Required.Error("is required")),
 	}.Filter()
+}
+
+func (s *Sensor) ServicesConfig(db *storm.DB) []*service.ServiceMap {
+	var svm []*service.ServiceMap
+	for _, v := range s.Cfgs {
+		switch v.Type {
+		case "telnet":
+			var tel telnet.TelnetService
+			db.One("ID", v.ServiceID, &tel)
+			sm := &service.ServiceMap{
+				Service:    tel,
+				SensorName: s.Name,
+				Type:       tel.Type,
+				Port:       strconv.Itoa(tel.Port),
+			}
+
+			svm = append(svm, sm)
+		}
+	}
+
+	return svm
 }

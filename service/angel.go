@@ -45,12 +45,19 @@ func NewAngel(auth *Auth) *Angel {
 }
 
 func Run(host, apikey string) {
-	auth, err := Config(host, apikey)
+	auth, err := ValidateAuth(host, apikey)
 	if err != nil {
 		log.Error("you must pass the cli values -host and -apikey |or| have valid auth.json file.")
 		log.Fatal(err)
 	}
 	log.Info(auth)
+
+	svm, err := HTTPServicesConfig(host, apikey)
+	if err != nil {
+		log.Error("Unable to get the config file for the sensor.")
+		log.Fatal(err)
+	}
+	log.Info(svm)
 
 	angel := NewAngel(auth)
 	startSensor(angel.SensorCtx)

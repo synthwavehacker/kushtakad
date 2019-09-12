@@ -4,12 +4,11 @@
         <div class="marjen z-depth-1">
             <div class="row">
                 <h5>Add Service</h5>
-                <h5>{{ .Sensor.ApiKey }}</h5>
             </div>
 
             <div class="row">
 
-                <div class="input-field col s8 m8 l8">
+                <div class="input-field col ">
                     <select id="service-type" name="type">
                         <option value="" disabled selected>---</option>
                         <option value="telnet">Telnet</option>
@@ -18,7 +17,7 @@
                     </select>
                 </div>
                 
-                <div class="input-field col s4 m4 l4">
+                <div class="input-field col ">
                     <button class="center aligned btn-floating waves-effect waves-light teal lighten-1" onclick="modalPop()">
                         <i class="material-icons">add</i>
                     </button>
@@ -35,12 +34,11 @@
         <div class="marjen z-depth-1">
             <div class="row">
                 <h5>Assigned Team</h5>
-                <h5>{{ .Sensor.ApiKey }}</h5>
             </div>
 
             <div class="row">
 
-                <div class="input-field col s8 m8 l8">
+                <div class="input-field col">
                     <select id="service-type" name="type">
                         <option value="{{ .Sensor.TeamID }}" selected>--current team---</option>
                     </select>
@@ -55,6 +53,32 @@
             </div>
 
         </div>
+        <br>
+        <div class="divider"></div>
+        <br>
+
+        <div class="marjen z-depth-1">
+            <div class="row">
+                <h5>Api Key</h5>
+            </div>
+
+            <div class="row">
+
+                <div class="input-field col">
+                        <input id="apikey" type="text" name="apikey" class="validate" value="{{ .Sensor.ApiKey }}">
+                        <label for="apikey">API Key</label>
+                </div>
+
+                <div class="input-field col">
+                    <button class="btn-floating waves-effect waves-light teal lighten-1" onclick="modalPop()">
+                        <i class="material-icons">content_copy</i>
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+ 
     </div>
 
     <div class="col s12 m8 l8">
@@ -92,7 +116,7 @@
         <div class="modal-content">
 
                 <div class="row">
-                    <h5 class="col">Do you want to delete the following service?</h5>
+                    <h5 class="col">Delete the service?</h5>
                 </div>
 
                 <div class="row">

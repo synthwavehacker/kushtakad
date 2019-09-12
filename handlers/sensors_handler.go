@@ -116,7 +116,7 @@ func PostSensors(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sensor := &models.Sensor{Name: name, TeamID: tid}
+	sensor := models.NewSensor(name, tid)
 	app.View.Forms.Sensor = sensor
 	err = sensor.ValidateCreate()
 	if err != nil {
@@ -133,7 +133,7 @@ func PostSensors(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tx.One("Name", name, sensor)
+	tx.One("Name", name, &sensor)
 	if sensor.ID > 0 {
 		tx.Rollback()
 		app.Fail("Sensor using that name already exists.")

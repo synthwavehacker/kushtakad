@@ -41,7 +41,7 @@ func Telnet() *TelnetService {
 }
 
 type TelnetService struct {
-	ID       int64  `storm:"id,increment,index"`
+	ID       int64  `storm:"id,increment,index" json:"id"`
 	SensorID int64  `storm:"index" json:"sensorId"`
 	Port     int    `json:"port"`
 	Prompt   string `json:"prompt"`

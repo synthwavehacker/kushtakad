@@ -1,0 +1,143 @@
+<html>
+    
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="description" content="{TODO: replace value from struct}">
+    <meta name="author" content="{TODO: replace with value from struct}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="/assets/admin/images/favicon.png">
+
+
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="/assets/admin/css/custom.css">
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+    <script src="/assets/admin/js/stars.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+
+    </head>
+
+
+    <body>
+        
+<div class="navbar-fixed black">
+  <nav class="black white-text z-depth-1">
+    <canvas width="10" height="120" id="stars"></canvas>
+    <div class="container black">
+
+      <div class="nav-wrapper">
+        <div class="brand-logo">
+          <div class="animated bounce">
+            <a href="https://www.kushtaka.org" target="_blank">
+              
+              
+              
+            </a>
+
+
+            
+            
+
+
+            
+          </div>
+        </div>
+        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+        <ul class="right hide-on-med-and-down">
+          
+
+    <ul id='settings' class='dropdown-content'>
+        <li><a class=""href="/kushtaka/teams/page/1/limit/10">Teams</a></li>
+        <li><a class="" href="/kushtaka/users/page/1/limit/10">Users</a></li>
+        <li><a href="/kushtaka/https">Https</a></li>
+        <li><a href="/kushtaka/smtp">Smtp</a></li>
+        <li class="divider" tabindex="-1"></li>
+        <li><a href="/kushtaka/logout">Logout</a></li>
+    </ul>
+    
+        
+            <li><a href="/login">Login</a></li>
+        
+    
+
+        </ul>
+      </div>
+    </div>
+  </nav>
+</div>
+
+<ul class="sidenav" id="mobile-demo">
+  
+    
+        
+            <li><a href="/login">Login</a></li>
+        
+    
+
+</ul>
+
+
+        <div class="container">
+            
+  <div id="parent_flashy">
+
+    
+  </div>
+  <script>
+    
+    $('#cleary').on('click',function(){
+      $('#flashy').delay(100).fadeOut(500);
+    }); 
+    
+
+  </script>
+
+            <div class="row">
+                <div class="row"></div>
+                <div class="col s12 m4 13"></div>
+                <div class="col s12 m6 13">
+                <div class="row">
+    <form class="col s12" method="post" action="/login">
+        <div class="row">
+            <h5 class="col s12 m10 13">Login</h5>
+        </div>
+        <div class="row">
+            <div class="input-field col s12 m10 13">
+                <input id="email" type="email" name="email" value="" required class="validate">
+                <label for="email" data-error="example: potus@whitehouse.gov" data-success="valid">Email</label>
+            </div>
+            <div class="input-field col s12 m10 13">
+                <input id="password" type="password" name="password" required class="validate" length="120"
+                    pattern=".{12,}">
+                <label for="password" data-error="required: 12 characters" data-success="valid">Password</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s12 m10 13">
+                <button class="waves-effect waves-light teal lighten-1 btn">Submit</button>
+            </div>
+        </div>
+
+    </form>
+</div>
+                </div>
+                <div class="col s12 m4 13"></div>
+            </div>
+        </div>
+        
+<script>
+    $(document).ready(function() {
+      M.updateTextFields();
+      $(".sidenav").sidenav();
+      $(".dropdown-trigger").dropdown({coverTrigger: false, alignment: 'bottom', outDuration: 0, inDuration: 0});
+      $('input#email, input#password').characterCounter();
+    });
+</script>
+
+    </body>
+</html>

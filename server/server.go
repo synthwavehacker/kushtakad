@@ -2,10 +2,13 @@ package server
 
 import (
 	"context"
+	"crypto/subtle"
 	"encoding/gob"
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/asdine/storm"
 	packr "github.com/gobuffalo/packr/v2"
@@ -51,6 +54,11 @@ func Run() {
 		log.Fatal(err)
 	}
 
+	err = models.Reindex(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	fss = sessions.NewFilesystemStore(state.SessionLocation(), settings.SessionHash, settings.SessionBlock)
 
 	// open
@@ -70,6 +78,11 @@ func Run() {
 	login.Use(forceSetup)
 	login.HandleFunc("", handlers.GetLogin).Methods("GET")
 	login.HandleFunc("", handlers.PostLogin).Methods("POST")
+
+	api := mux.NewRouter().PathPrefix("/api/v1").Subrouter().StrictSlash(false)
+	api.Use(forceSetup)
+	api.Use(isAuthenticatedWithToken)
+	api.HandleFunc("/config.json", handlers.GetConfig).Methods("GET")
 
 	// mod has its own middleware chain
 	// protected, can't process unless logged in and setup is complete
@@ -130,6 +143,10 @@ func Run() {
 		negroni.Wrap(login),
 	))
 
+	rtr.PathPrefix("/api/v1").Handler(negroni.New(
+		negroni.Wrap(api),
+	))
+
 	rtr.PathPrefix("/kushtaka").Handler(negroni.New(
 		negroni.Wrap(kushtaka),
 	))
@@ -142,6 +159,10 @@ func Run() {
 	n.UseHandler(rtr)
 	n.Use(negroni.HandlerFunc(after))
 
+	go func() {
+		time.Sleep(3 * time.Second)
+		log.Printf("Listening on...%s\n", settings.Host)
+	}()
 	log.Fatal(http.ListenAndServe(settings.Host, n))
 }
 
@@ -169,6 +190,28 @@ func isAuthenticated(next http.Handler) http.Handler {
 		if app.User.ID < 1 {
 			app.Fail("You must login before proceeding.")
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func isAuthenticatedWithToken(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var apiKey string
+		app := r.Context().Value(state.AppStateKey).(*state.App)
+		token, ok := r.Header["Authorization"]
+		log.Println(token)
+		if ok && len(token) >= 1 {
+			apiKey = token[0]
+			apiKey = strings.TrimPrefix(apiKey, "Bearer ")
+		}
+
+		var sensor models.Sensor
+		app.DB.One("ApiKey", apiKey, &sensor)
+		if subtle.ConstantTimeCompare([]byte(sensor.ApiKey), []byte(apiKey)) == 0 {
+			app.Render.JSON(w, 401, "")
 			return
 		}
 

@@ -1,6 +1,11 @@
 package models
 
 import (
+	"fmt"
+	"log"
+	"net"
+	"os"
+
 	"github.com/asdine/storm"
 	"github.com/gorilla/securecookie"
 )
@@ -32,7 +37,12 @@ func InitSettings(db *storm.DB) (Settings, error) {
 	}
 
 	if len(s.Host) == 0 {
-		s.Host = "localhost:8080"
+		if os.Getenv("KUSHTAKA_ENV") == "development" {
+			s.Host = "localhost:8080"
+		} else {
+			ip := GetOutboundIP().String()
+			s.Host = fmt.Sprintf("%s:8080", ip)
+		}
 	}
 
 	if s.Scheme != "http" || s.Scheme != "https" {
@@ -47,6 +57,8 @@ func InitSettings(db *storm.DB) (Settings, error) {
 	return s, nil
 }
 
+
+
 func FindSettings(db *storm.DB) (*Settings, error) {
 	var s Settings
 	err := db.One("ID", SettingsID, &s)
@@ -54,4 +66,17 @@ func FindSettings(db *storm.DB) (*Settings, error) {
 		return nil, err
 	}
 	return &s, nil
+}
+
+// Get preferred outbound ip of this machine
+func GetOutboundIP() net.IP {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+
+	return localAddr.IP
 }

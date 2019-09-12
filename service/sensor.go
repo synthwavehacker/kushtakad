@@ -21,10 +21,10 @@ var log = logging.MustGetLogger("sensors")
 func configureServices(h *Hub) {
 	tel := telnet.Telnet()
 	sm := &ServiceMap{
-		Service: tel,
-		Name:    "telnet",
-		Type:    "telnet",
-		Port:    "2222",
+		Service:    tel,
+		SensorName: "unknown",
+		Type:       "telnet",
+		Port:       "2222",
 	}
 
 	addr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort("localhost", "2222"))
@@ -91,13 +91,13 @@ func (h *Hub) handle(c net.Conn) {
 		return
 	}
 
-	log.Debug("Handling connection for %s => %s %s(%s)", c.RemoteAddr(), c.LocalAddr(), sm.Name, sm.Type)
+	log.Debug("Handling connection for %s => %s %s(%s)", c.RemoteAddr(), c.LocalAddr(), sm.SensorName, sm.Type)
 
 	newConn = TimeoutConn(newConn, time.Second*30)
 
 	ctx := context.Background()
 	if err := sm.Service.Handle(ctx, newConn); err != nil {
-		log.Errorf(color.RedString("Error handling service: %s: %s", sm.Name, err.Error()))
+		log.Errorf(color.RedString("Error handling service: %s: %s", sm.SensorName, err.Error()))
 	}
 }
 
@@ -112,9 +112,17 @@ type Hub struct {
 type ServiceMap struct {
 	Service Servicer
 
-	Name string
-	Type string
-	Port string
+	SensorName string
+	Type       string
+	Port       string
+}
+
+type TmpMap struct {
+	Service interface{}
+
+	SensorName string
+	Type       string
+	Port       string
 }
 
 type Servicer interface {

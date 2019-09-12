@@ -10,8 +10,6 @@ type View struct {
 	FlashFail      []string
 	URI            string
 	Crumbs         []*Crumb
-	Endpoints      []*models.Endpoint
-	Endpoint       *models.Endpoint
 	User           *models.User
 	State          *models.State
 	Links          *Links
@@ -43,7 +41,6 @@ type Links struct {
 }
 
 func NewView() *View {
-	var endpoints []*models.Endpoint
 	var ff []string
 	var fs []string
 	var tm []models.Team
@@ -54,9 +51,7 @@ func NewView() *View {
 		FlashSuccess: fs,
 		Teams:        tm,
 		Users:        users,
-		Endpoints:    endpoints,
 		Crumbs:       crumbs,
-		Endpoint:     &models.Endpoint{},
 		Links:        &Links{},
 		Forms:        NewForms(),
 		Team:         models.NewTeam(),
