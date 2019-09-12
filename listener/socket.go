@@ -44,23 +44,8 @@ func (s *socketListener) AddAddress(a net.Addr) {
 	s.Addresses = append(s.Addresses, a)
 }
 
-func NewSocket(options ...func(Listener) error) (Listener, error) {
+func NewSocket(sc SocketConfig) (Listener, error) {
 	ch := make(chan net.Conn)
-
-	sc := SocketConfig{}
-	serviceMap := make(map[string]string)
-
-	serviceMap["2222"] = "localhost"
-	serviceMap["2223"] = "localhost"
-
-	for port, host := range serviceMap {
-		addr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort(host, port))
-		if err != nil {
-			panic(err)
-		}
-
-		sc.AddAddress(addr)
-	}
 
 	l := socketListener{
 		SocketConfig: sc,

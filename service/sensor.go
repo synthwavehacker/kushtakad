@@ -12,41 +12,35 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/kushtaka/kushtakad/listener"
-	"github.com/kushtaka/kushtakad/service/telnet"
 	"github.com/op/go-logging"
 )
 
 var log = logging.MustGetLogger("sensors")
 
-func configureServices(h *Hub) {
-	tel := telnet.Telnet()
-	sm := &ServiceMap{
-		Service:    tel,
-		SensorName: "unknown",
-		Type:       "telnet",
-		Port:       "2222",
-	}
+func configureServices(h *Hub, svm []*ServiceMap) listener.SocketConfig {
 
-	addr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort("localhost", "2222"))
-	if err != nil {
-		log.Fatal(err)
+	sc := listener.SocketConfig{}
+	for _, sm := range svm {
+		addr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort("localhost", sm.Port))
+		if err != nil {
+			log.Fatal(err)
+		}
+		h.ports[addr] = append(h.ports[addr], sm)
+		sc.AddAddress(addr)
 	}
-
-	h.ports[addr] = append(h.ports[addr], sm)
+	return sc
 
 }
 
-func startSensor(ctx context.Context) {
+func startSensor(ctx context.Context, svm []*ServiceMap) {
 
-	h := &Hub{
-		ports: make(map[net.Addr][]*ServiceMap),
-	}
+	h := &Hub{ports: make(map[net.Addr][]*ServiceMap)}
 
-	configureServices(h)
+	sc := configureServices(h, svm)
 
 	incoming := make(chan net.Conn)
 
-	l, err := listener.NewSocket()
+	l, err := listener.NewSocket(sc)
 	if err != nil {
 		log.Fatal(err)
 	}

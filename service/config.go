@@ -84,11 +84,11 @@ func LastHeartbeat() (time.Time, error) {
 	return time.Now(), errors.New("Time unknown")
 }
 
-func HTTPServicesConfig(host, key string) ([]interface{}, error) {
+func HTTPServicesConfig(host, key string) ([]*ServiceMap, error) {
 	url := host + "/api/v1/config.json"
 
 	spaceClient := http.Client{
-		Timeout: time.Second * 5, // Maximum of 2 secs
+		Timeout: time.Second * 5,
 	}
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -116,18 +116,27 @@ func HTTPServicesConfig(host, key string) ([]interface{}, error) {
 
 	log.Info(tmpMap)
 
+	var svm []*ServiceMap
 	for _, v := range tmpMap {
 		switch v.Type {
 		case "telnet":
+			sm := &ServiceMap{
+				Type:       v.Type,
+				Port:       v.Port,
+				SensorName: v.SensorName,
+			}
 			var tel telnet.TelnetService
-			mapstructure.Decode(v.Service, &tel)
-			// TODO:
-			// Now put this in a aservice map and return
-			// the service map
+			err := mapstructure.Decode(v.Service, &tel)
+			if err != nil {
+				return nil, err
+			}
 
+			sm.Service = tel
+			svm = append(svm, sm)
 			log.Infof("Did it decode? %v", tel)
+
 		}
 	}
 
-	return nil, nil
+	return svm, nil
 }

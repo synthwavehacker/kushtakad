@@ -21,7 +21,6 @@ func interuptor(cancel context.CancelFunc) {
 		s := make(chan os.Signal, 1)
 		signal.Notify(s, os.Interrupt)
 		signal.Notify(s, syscall.SIGTERM)
-
 		select {
 		case <-s:
 			cancel()
@@ -60,15 +59,14 @@ func Run(host, apikey string) {
 	log.Info(svm)
 
 	angel := NewAngel(auth)
-	startSensor(angel.SensorCtx)
+	startSensor(angel.SensorCtx, svm)
 
 	for {
 		select {
-		case <-angel.MyCtx.Done(): // if the angel's context is close
+		case <-angel.MyCtx.Done(): // if the angel's context is closed
 			angel.SensorCtx.Done() // close the sensor's
 			log.Info("shutting down angel...done.")
 			return
-
 		default:
 		}
 	}
