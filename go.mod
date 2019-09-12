@@ -34,6 +34,7 @@ require (
 	github.com/kushtaka/kushtakas v0.0.0-20190903154744-0892df07c366
 	github.com/magiconair/properties v1.8.1 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.2
+	github.com/mitchellh/mapstructure v1.1.2
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect

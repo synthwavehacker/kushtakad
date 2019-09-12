@@ -7,9 +7,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"reflect"
 	"time"
-	//"github.com/kushtaka/kushtakad/service/telnet"
+
+	"github.com/kushtaka/kushtakad/service/telnet"
+	"github.com/mitchellh/mapstructure"
 )
 
 var data map[string]interface{}
@@ -113,16 +114,18 @@ func HTTPServicesConfig(host, key string) ([]interface{}, error) {
 		return nil, err
 	}
 
+	log.Info(tmpMap)
+
 	for _, v := range tmpMap {
 		switch v.Type {
 		case "telnet":
-			rf := reflect.ValueOf(v.Service)
-			log.Info(rf)
-			//rf.FieldByName("Port")
-			//log.Info("telnet", rf.Kind())
-			//log.Info("telnet", rf.FieldByName("Port"))
-			//back, ok := v.Service.(telnet.TelnetService)
-			//log.Info("telnet", v.Service, back.ID, ok)
+			var tel telnet.TelnetService
+			mapstructure.Decode(v.Service, &tel)
+			// TODO:
+			// Now put this in a aservice map and return
+			// the service map
+
+			log.Infof("Did it decode? %v", tel)
 		}
 	}
 

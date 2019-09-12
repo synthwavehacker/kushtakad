@@ -110,19 +110,19 @@ type Hub struct {
 
 // Wraps a Servicer, adding some metadata
 type ServiceMap struct {
-	Service Servicer
+	Service Servicer `json:"service"`
 
-	SensorName string
-	Type       string
-	Port       string
+	SensorName string `json:"sensor_name"`
+	Type       string `json:"type"`
+	Port       string `json:"port`
 }
 
 type TmpMap struct {
-	Service interface{}
+	Service interface{} `json:"service"`
 
-	SensorName string
-	Type       string
-	Port       string
+	SensorName string `json:"sensor_name"`
+	Type       string `json:"type"`
+	Port       string `json:"port`
 }
 
 type Servicer interface {
