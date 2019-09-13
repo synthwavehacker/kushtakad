@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
@@ -14,7 +13,7 @@ func GetTeam(w http.ResponseWriter, r *http.Request) {
 	redir := "/kushtaka/teams/page/1/limit/100"
 	app, err := state.Restore(r)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return
 	}
 
@@ -40,7 +39,7 @@ func GetTeam(w http.ResponseWriter, r *http.Request) {
 func PostTeam(w http.ResponseWriter, r *http.Request) {
 	app, err := state.Restore(r)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 
 	email := r.FormValue("email")
@@ -98,11 +97,11 @@ func PostTeam(w http.ResponseWriter, r *http.Request) {
 }
 
 func PutTeam(w http.ResponseWriter, r *http.Request) {
-	log.Println("PutTeam()")
+	log.Error("PutTeam()")
 	return
 }
 
 func DeleteTeam(w http.ResponseWriter, r *http.Request) {
-	log.Println("DeleteTeam()")
+	log.Error("DeleteTeam()")
 	return
 }

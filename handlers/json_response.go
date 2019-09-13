@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 )
 
 type Response struct {
@@ -27,7 +26,7 @@ func NewResponse(s, msg string, err error) *Response {
 func (r *Response) JSON() []byte {
 	b, err := json.Marshal(r)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return b
 	}
 	return b

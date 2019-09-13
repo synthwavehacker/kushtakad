@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 	"strings"
 	"io/ioutil"
@@ -66,7 +65,7 @@ func PostEvent(w http.ResponseWriter, r *http.Request) {
 
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		app.Render.JSON(w, 404, err)
 		return
 	}
@@ -75,14 +74,14 @@ func PostEvent(w http.ResponseWriter, r *http.Request) {
 	var em events.EventManager
 	err = json.Unmarshal(b, &em)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		app.Render.JSON(w, 404, err)
 		return
 	}
 
 	err = app.DB.Save(&em)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		app.Render.JSON(w, 404, err)
 		return
 	}

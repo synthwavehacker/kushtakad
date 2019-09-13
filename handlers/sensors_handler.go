@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -15,7 +14,7 @@ func GetSensor(w http.ResponseWriter, r *http.Request) {
 	redir := "/kushtaka/sensors/page/1/limit/100"
 	app, err := state.Restore(r)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return
 	}
 
@@ -43,7 +42,7 @@ func GetSensor(w http.ResponseWriter, r *http.Request) {
 	}
 	app.View.Teams = teams
 
-	log.Println(teams)
+	log.Error(teams)
 
 	app.View.Links.Sensors = "active"
 	app.View.AddCrumb("Sensors", "/kushtaka/sensors/page/1/limit/100")
@@ -53,17 +52,17 @@ func GetSensor(w http.ResponseWriter, r *http.Request) {
 }
 
 func PostSensor(w http.ResponseWriter, r *http.Request) {
-	log.Println("PostSensor()")
+	log.Error("PostSensor()")
 	return
 }
 
 func UpdateSensor(w http.ResponseWriter, r *http.Request) {
-	log.Println("UpdateSensor()")
+	log.Error("UpdateSensor()")
 	return
 }
 
 func DeleteSensor(w http.ResponseWriter, r *http.Request) {
-	log.Println("DeleteSensor()")
+	log.Error("DeleteSensor()")
 	return
 }
 
@@ -94,8 +93,6 @@ func GetSensors(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	app.View.Teams = teams
-
-	log.Println(teams)
 	app.View.AddCrumb("Sensors", "#")
 	app.Render.HTML(w, http.StatusOK, "admin/pages/sensors", app.View)
 	return

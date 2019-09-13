@@ -24,10 +24,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/kushtaka/kushtakad/listener"
-	"github.com/op/go-logging"
 )
 
-var log = logging.MustGetLogger("sensors")
 
 func configureServices(h *Hub, svm []*ServiceMap) listener.SocketConfig {
 

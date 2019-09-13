@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/kushtaka/kushtakad/models"
@@ -11,7 +10,7 @@ import (
 func GetSetup(w http.ResponseWriter, r *http.Request) {
 	app, err := state.Restore(r)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 
 	if app.View.State.AdminIsSetup {
@@ -23,7 +22,7 @@ func GetSetup(w http.ResponseWriter, r *http.Request) {
 	var users models.User
 	err = app.DB.One("ID", 1, &users)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 
 	/*
@@ -40,7 +39,7 @@ func GetSetup(w http.ResponseWriter, r *http.Request) {
 func PostSetup(w http.ResponseWriter, r *http.Request) {
 	app, err := state.Restore(r)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 
 	if app.View.State.AdminIsSetup {

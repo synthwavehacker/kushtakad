@@ -19,10 +19,7 @@ import (
 	"net"
 
 	"github.com/fatih/color"
-	logging "github.com/op/go-logging"
 )
-
-var log = logging.MustGetLogger("listeners/socket")
 
 type socketListener struct {
 	SocketConfig

@@ -3,7 +3,6 @@ package handlers
 import (
 	"bytes"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -15,16 +14,16 @@ import (
 )
 
 func GetTestToken(w http.ResponseWriter, r *http.Request) {
-	log.Println("test token")
+	log.Error("test token")
 	app, err := state.Restore(r)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return
 	}
 
 	i, err := app.Box.Find("files/i.png")
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return
 	}
 
@@ -36,20 +35,20 @@ func GetTestToken(w http.ResponseWriter, r *http.Request) {
 func CreateDocxToken(w http.ResponseWriter, r *http.Request) {
 	app, err := state.Restore(r)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return
 	}
 
 	token := &models.Token{}
 	ts, err := token.BuildDocx(app.Box)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return
 	}
 
 	data, err := ioutil.ReadFile(ts)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return
 	}
 
@@ -60,17 +59,17 @@ func CreateDocxToken(w http.ResponseWriter, r *http.Request) {
 func CreatePdfToken(w http.ResponseWriter, r *http.Request) {
 	app, err := state.Restore(r)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return
 	}
 
 	pdfc, err := pdf.NewPdfContext("http://localhost:3000", app.Box)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return
 	}
 
-	log.Println("PDFC-URL", pdfc.Url)
+	log.Error("PDFC-URL", pdfc.Url)
 
 	w.Header().Set("Content-Disposition", "attachment; filename=canary.pdf")
 	http.ServeContent(w, r, "canary.pdf", time.Now(), bytes.NewReader(pdfc.Buffer.Bytes()))
@@ -80,7 +79,7 @@ func GetToken(w http.ResponseWriter, r *http.Request) {
 	redirUrl := "/kushtaka/teams/page/1/limit/100"
 	app, err := state.Restore(r)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return
 	}
 
@@ -108,7 +107,7 @@ func PostToken(w http.ResponseWriter, r *http.Request) {
 
 		app, err := state.Restore(r)
 		if err != nil {
-			log.Println(err)
+			log.Error(err)
 		}
 
 		email := r.FormValue("email")
@@ -167,11 +166,11 @@ func PostToken(w http.ResponseWriter, r *http.Request) {
 }
 
 func PutToken(w http.ResponseWriter, r *http.Request) {
-	log.Println("PutToken()")
+	log.Error("PutToken()")
 	return
 }
 
 func DeleteToken(w http.ResponseWriter, r *http.Request) {
-	log.Println("DeleteToken()")
+	log.Error("DeleteToken()")
 	return
 }

@@ -16,7 +16,6 @@ import (
 	packr "github.com/gobuffalo/packr/v2"
 	"github.com/gorilla/sessions"
 	"github.com/kushtaka/kushtakad/models"
-	"github.com/op/go-logging"
 	"github.com/unrolled/render"
 )
 
@@ -26,8 +25,6 @@ const UserStateKey = "UserState"
 const FormStateKey = "FormState"
 const FlashFail = "FlashFail"
 const FlashSuccess = "FlashSuccess"
-
-var log = logging.MustGetLogger("state")
 
 type App struct {
 	Response  http.ResponseWriter

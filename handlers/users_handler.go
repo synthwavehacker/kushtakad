@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/kushtaka/kushtakad/models"
@@ -9,22 +8,22 @@ import (
 )
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
-	log.Println("GetUser()")
+	log.Error("GetUser()")
 	return
 }
 
 func PostUser(w http.ResponseWriter, r *http.Request) {
-	log.Println("PostUser()")
+	log.Error("PostUser()")
 	return
 }
 
 func PutUser(w http.ResponseWriter, r *http.Request) {
-	log.Println("PutUser()")
+	log.Error("PutUser()")
 	return
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
-	log.Println("DeleteUser()")
+	log.Error("DeleteUser()")
 	return
 }
 
@@ -56,7 +55,7 @@ func PostUsers(w http.ResponseWriter, r *http.Request) {
 	redir := "/kushtaka/users/page/1/limit/100"
 	app, err := state.Restore(r)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 
 	user := &models.User{

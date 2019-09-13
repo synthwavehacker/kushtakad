@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/kushtaka/kushtakad/models"
@@ -11,7 +10,7 @@ import (
 func GetSmtp(w http.ResponseWriter, r *http.Request) {
 	app, err := state.Restore(r)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 
 	var smtp models.Smtp
@@ -29,7 +28,7 @@ func GetSmtp(w http.ResponseWriter, r *http.Request) {
 func PostSmtp(w http.ResponseWriter, r *http.Request) {
 	app, err := state.Restore(r)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 
 	smtp := &models.Smtp{
@@ -77,11 +76,11 @@ func PostSmtp(w http.ResponseWriter, r *http.Request) {
 }
 
 func PutSmtp(w http.ResponseWriter, r *http.Request) {
-	log.Println("PutSmtp()")
+	log.Error("PutSmtp()")
 	return
 }
 
 func DeleteSmtp(w http.ResponseWriter, r *http.Request) {
-	log.Println("DeleteSmtp()")
+	log.Error("DeleteSmtp()")
 	return
 }

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"log"
 	"mime"
 	"net/http"
 	"path"
@@ -20,7 +19,7 @@ func IndexCheckr(w http.ResponseWriter, r *http.Request) {
 func Asset(w http.ResponseWriter, r *http.Request) {
 	app, err := state.Restore(r)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 
 	v := mux.Vars(r)

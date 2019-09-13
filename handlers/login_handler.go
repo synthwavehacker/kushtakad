@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/kushtaka/kushtakad/models"
@@ -11,7 +10,7 @@ import (
 func GetLogin(w http.ResponseWriter, r *http.Request) {
 	app, err := state.Restore(r)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 
 	if app.View.State.IsAuthd {
@@ -27,7 +26,7 @@ func GetLogin(w http.ResponseWriter, r *http.Request) {
 func PostLogin(w http.ResponseWriter, r *http.Request) {
 	app, err := state.Restore(r)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 
 	if app.View.State.IsAuthd {
@@ -71,6 +70,6 @@ func PostLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func ReadSettings(w http.ResponseWriter, r *http.Request) {
-	log.Println("read settings")
+	log.Error("read settings")
 	return
 }

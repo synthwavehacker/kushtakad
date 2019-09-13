@@ -38,21 +38,6 @@ func WithAddress(protocol, address string) func(Listener) error {
 	}
 }
 
-/*
-type SetChanneler interface {
-	SetChannel(pushers.Channel)
-}
-
-func WithChannel(channel pushers.Channel) func(Listener) error {
-	return func(d Listener) error {
-		if sc, ok := d.(SetChanneler); ok {
-			sc.SetChannel(channel)
-		}
-		return nil
-	}
-}
-*/
-
 type TomlDecoder interface {
 	PrimitiveDecode(primValue toml.Primitive, v interface{}) error
 }

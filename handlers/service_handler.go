@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -28,7 +27,7 @@ func DeleteService(w http.ResponseWriter, r *http.Request) {
 		resp = NewResponse("error", "Unable to decode response body", err)
 		w.Write(resp.JSON())
 	}
-	fmt.Println(scfgFinder.ServiceID)
+	log.Debug(scfgFinder.ServiceID)
 
 	tx, err := app.DB.Begin(true)
 	if err != nil {
@@ -49,8 +48,8 @@ func DeleteService(w http.ResponseWriter, r *http.Request) {
 
 	var sensor models.Sensor
 	err = tx.One("ID", scfg.SensorID, &sensor)
-	log.Println(err)
 	if err != nil {
+		log.Error(err)
 		tx.Rollback()
 		resp := NewResponse("error", "Sensor id not found, does sensor exist?", err)
 		w.Write(resp.JSON())
