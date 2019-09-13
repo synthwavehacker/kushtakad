@@ -26,3 +26,7 @@ build/
 .grifter/
 **/*.log
 **/*.db
+**/*-packr.go
+*.log
+*.db
+
