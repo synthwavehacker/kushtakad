@@ -1,6 +1,7 @@
 package state
 
 import (
+	"github.com/kushtaka/kushtakad/events"
 	"github.com/kushtaka/kushtakad/models"
 )
 
@@ -22,6 +23,7 @@ type View struct {
 	Sensors        []models.Sensor
 	Users          []models.User
 	SensorServices []models.ServiceCfg
+	Events []events.EventManager
 }
 
 type Crumb struct {
@@ -46,10 +48,12 @@ func NewView() *View {
 	var tm []models.Team
 	var users []models.User
 	var crumbs []*Crumb
+	var events []events.EventManager
 	return &View{
 		FlashFail:    ff,
 		FlashSuccess: fs,
 		Teams:        tm,
+		Events: events,
 		Users:        users,
 		Crumbs:       crumbs,
 		Links:        &Links{},

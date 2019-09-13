@@ -1,12 +1,12 @@
 package models
 
 import (
-	
+
+	"github.com/kushtaka/kushtakad/events"
 	"github.com/asdine/storm"
 )
 
-
-// On startup reindex is called, though a bit dangerous, this is required 
+// On startup reindex is called, though a bit dangerous, this is required
 // should we change our datastructures, we want that change reflected in our data storage
 func Reindex(db *storm.DB) error {
 	var err error
@@ -17,6 +17,17 @@ func Reindex(db *storm.DB) error {
 	}
 
 	err = db.ReIndex(&User{})
+	if err != nil {
+		return err
+	}
+
+	// EventManager
+	err = db.Init(&events.EventManager{})
+	if err != nil {
+		return err
+	}
+
+	err = db.ReIndex(&events.EventManager{})
 	if err != nil {
 		return err
 	}

@@ -131,6 +131,8 @@ func HTTPServicesConfig(host, key string) ([]*ServiceMap, error) {
 				return nil, err
 			}
 
+			tel.Host = host
+			tel.ApiKey = key
 			sm.Service = tel
 			svm = append(svm, sm)
 			log.Infof("Did it decode? %v", tel)

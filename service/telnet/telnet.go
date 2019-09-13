@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"net"
 
+	"github.com/kushtaka/kushtakad/events"
+	"github.com/op/go-logging"
 	"github.com/rs/xid"
 )
 
@@ -30,6 +31,8 @@ Login authentication
 	prompt = `$ `
 )
 
+var log = logging.MustGetLogger("telnet")
+
 // Telnet is a placeholder
 func Telnet() *TelnetService {
 	s := &TelnetService{
@@ -47,9 +50,29 @@ type TelnetService struct {
 	Prompt   string `json:"prompt"`
 	Emulate  string `json:"emulate"`
 	Type     string `json:"type"`
+
+	Host   string
+	ApiKey string
+}
+
+func (s TelnetService) SetHost(h string) {
+	s.Host = h
+}
+
+func (s TelnetService) SetApiKey(k string) {
+	s.ApiKey = k
 }
 
 func (s TelnetService) Handle(ctx context.Context, conn net.Conn) error {
+	em := events.NewEventManager(s.Type, s.Port, s.ID)
+
+
+	log.Debugf("Handle %s %s", s.Host, s.ApiKey)
+
+	err := em.SendEvent("new", s.Host, s.ApiKey, conn.RemoteAddr())
+	if err != nil {
+		log.Debug(err)
+	}
 	id := xid.New()
 
 	defer conn.Close()
@@ -73,7 +96,7 @@ func (s TelnetService) Handle(ctx context.Context, conn net.Conn) error {
 		return err
 	}
 
-	log.Println(id, username, password)
+	log.Debug(id, username, password)
 
 	term.SetPrompt(s.Prompt)
 

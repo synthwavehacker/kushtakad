@@ -8,10 +8,9 @@ import (
 )
 
 type Angel struct {
-	Auth     *Auth
-	MyCtx    context.Context
-	MyCancel context.CancelFunc
-
+	Auth         *Auth
+	AngelCtx     context.Context
+	AngelCancel  context.CancelFunc
 	SensorCtx    context.Context
 	SensorCancel context.CancelFunc
 }
@@ -34,12 +33,12 @@ func NewAngel(auth *Auth) *Angel {
 	sensorCtx, sensorCancel := context.WithCancel(context.Background())
 	angel := &Angel{
 		Auth:         auth,
-		MyCtx:        angelCtx,
-		MyCancel:     angelCancel,
+		AngelCtx:     angelCtx,
+		AngelCancel:  angelCancel,
 		SensorCtx:    sensorCtx,
 		SensorCancel: sensorCancel,
 	}
-	interuptor(angel.MyCancel)
+	interuptor(angel.AngelCancel)
 	return angel
 }
 
@@ -51,7 +50,7 @@ func Run(host, apikey string) {
 	}
 	log.Info(auth)
 
-	svm, err := HTTPServicesConfig(host, apikey)
+	svm, err := HTTPServicesConfig(auth.Host, auth.Key)
 	if err != nil {
 		log.Error("Unable to get the config file for the sensor.")
 		log.Fatal(err)
@@ -59,11 +58,11 @@ func Run(host, apikey string) {
 	log.Info(svm)
 
 	angel := NewAngel(auth)
-	startSensor(angel.SensorCtx, svm)
+	startSensor(auth, angel.SensorCtx, svm)
 
 	for {
 		select {
-		case <-angel.MyCtx.Done(): // if the angel's context is closed
+		case <-angel.AngelCtx.Done(): // if the angel's context is closed
 			angel.SensorCtx.Done() // close the sensor's
 			log.Info("shutting down angel...done.")
 			return

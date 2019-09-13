@@ -1,0 +1,42 @@
+<div class="row">
+
+    <div class="col s12">
+        {{ if len .Events }}
+            <div class="marjen z-depth-1">
+
+                <h5>Events</h5>
+
+                <table class="striped">
+                    <thead>
+                        <tr>
+                            <th>Event ID</th>
+                            <th>Event State</th>
+                            <th>Sensor Type</th>
+                            <th>Sensor Port</th>
+                            <th>Network</th>
+                            <th>IP</th>
+                            <th>When</th>
+                            <th>Sensor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {{ range $key, $v := .Events }}
+                            <tr>
+                                <td>{{ $v.ID }}</td>
+                                <td>{{ $v.State }}</td>
+                                <td>{{ $v.SensorType }}</td>
+                                <td>{{ $v.SensorPort }}</td>
+                                <td>{{ $v.AttackerNetwork }}</td>
+                                <td>{{ $v.AttackerIP }}</td>
+                                <td>{{ $v.AttackerLastProbed }}</td>
+                                <td><a class="btn-floating waves-effect waves-light teal lighten-1" href="/kushtaka/sensor/{{ $v.SensorID }}"><i class="material-icons">settings</i></a></td>
+
+                            </tr>
+                    {{ end }}
+                    </tbody>
+                </table>
+            </div>
+        {{ end }}
+    </div>
+
+</div>

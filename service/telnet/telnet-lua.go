@@ -3,7 +3,6 @@ package telnet
 import (
 	"context"
 	"io"
-	"log"
 	"net"
 
 	"github.com/rs/xid"
@@ -50,7 +49,7 @@ func (s *telnetLuaService) Handle(ctx context.Context, conn net.Conn) error {
 		return err
 	}
 
-	log.Println(id, username, password)
+	log.Debug(id, username, password)
 
 	term.SetPrompt(s.Prompt)
 
