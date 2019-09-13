@@ -1,5 +1,5 @@
-<div class="col s12 m6 l6">
-    <div class="row">
+<div class="row">
+    <div class="col s12 m6 l6">
         <form class="tform z-depth-1" method="post" action="/kushtaka/smtp">
 
             <div class="row">
@@ -41,7 +41,8 @@
             <div class="row">
                 <div class="col s12 m8 18">
                     <button class="waves-effect waves-light teal lighten-1 btn">Save</button>
-                    <a id="send-test" onclick="sendTest()" class="waves-effect waves-light lighten-1 btn">Send Test <i class="material-icons right">send</i></a>
+                    <a id="send-test" onclick="sendTest()" class="waves-effect waves-light lighten-1 btn">Send Test <i
+                            class="material-icons right">send</i></a>
                 </div>
             </div>
 
@@ -54,7 +55,7 @@
 <script>
 
 
-    $(document).ready(function(){
+    $(document).ready(function () {
         checkFill();
         document.addEventListener('keydown', checkFill);
     });
@@ -74,13 +75,13 @@
         };
 
 
-       for (var key in form) {
-        if (form[key].length === 0) {
-            isFilled = false
-        }
-       };
+        for (var key in form) {
+            if (form[key].length === 0) {
+                isFilled = false
+            }
+        };
 
-       return isFilled
+        return isFilled
     }
 
     function checkFill() {

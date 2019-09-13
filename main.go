@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"log"
 	"math/rand"
 	"time"
 
@@ -22,7 +21,6 @@ func main() {
 	apikey := flag.String("apikey", empty, "the api key of the sensor, create from the kushtaka dashboard. (string)")
 	sensor := flag.Bool("sensor", false, "would you like this instance to be a sensor? (bool)")
 	flag.Parse()
-	log.Println(*host, *apikey, *sensor)
 
 	if *sensor {
 		service.Run(*host, *apikey)
