@@ -64,8 +64,7 @@ func (s TelnetService) SetApiKey(k string) {
 }
 
 func (s TelnetService) Handle(ctx context.Context, conn net.Conn) error {
-	em := events.NewEventManager(s.Type, s.Port, s.ID)
-
+	em := events.NewEventManager(s.Type, s.Port, s.SensorID)
 
 	log.Debugf("Handle %s %s", s.Host, s.ApiKey)
 
