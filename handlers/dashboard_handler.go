@@ -16,7 +16,8 @@ func GetDashboard(w http.ResponseWriter, r *http.Request) {
 
 	var events []events.EventManager
 	app.DB.All(&events, storm.Reverse())
-	log.Info(events)
+	log.Infof("total events found %d", len(events))
+	app.View.AddCrumb("Dashboard", "#")
 	app.View.Events = events
 	app.View.Links.Dashboard = "active"
 	app.Render.HTML(w, http.StatusOK, "admin/pages/dashboard", app.View)
