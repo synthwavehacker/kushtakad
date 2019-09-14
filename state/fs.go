@@ -31,13 +31,6 @@ func SetupFileStructure(box *packr.Box) error {
 		return errors.Wrap(err, "unable to detect current working directory")
 	}
 
-	/*
-		themePath = path.Join(cwd, dataDir, staticDir)
-		if _, err := os.Stat(themePath); !os.IsNotExist(err) {
-			os.RemoveAll(themePath)
-		}
-	*/
-
 	imagesPath = path.Join(cwd, dataDir, imagesDir)
 	if _, err := os.Stat(imagesPath); os.IsNotExist(err) {
 		err = os.MkdirAll(imagesPath, 0744)
@@ -53,15 +46,6 @@ func SetupFileStructure(box *packr.Box) error {
 			return errors.Wrap(err, fmt.Sprintf("unable to make directory %s", sessionsPath))
 		}
 	}
-
-	/*
-		packrstaticDir := "static" // packrstaticDir is the same but we add the var for readability
-		b := packr.New(packrstaticDir, staticDir)
-		err = createFiles(b)
-		if err != nil {
-			return err
-		}
-	*/
 
 	return nil
 }

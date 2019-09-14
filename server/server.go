@@ -6,7 +6,6 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -17,15 +16,16 @@ import (
 	"github.com/kushtaka/kushtakad/handlers"
 	"github.com/kushtaka/kushtakad/models"
 	"github.com/kushtaka/kushtakad/state"
-	"github.com/urfave/negroni"
 	"github.com/op/go-logging"
-
+	"github.com/pkg/browser"
+	"github.com/urfave/negroni"
 )
 
 const assetsFolder = "static"
 const sessionName = "_kushtaka"
 
 var (
+	log      = logging.MustGetLogger("main")
 	rtr      *mux.Router
 	fss      *sessions.FilesystemStore
 	db       *storm.DB
@@ -34,58 +34,31 @@ var (
 	err      error
 )
 
-var log = logging.MustGetLogger("server")
-
-// Example format string. Everything except the message has a custom color
-// which is dependent on the log level. Many fields have a custom output
-// formatting too, eg. the time returns the hour down to the milli second.
-var format = logging.MustStringFormatter(
-	`%{color}%{time:15:04:05.000} %{shortfunc} ▶ %{level:.4s} %{id:03x}%{color:reset} %{message}`,
-)
-
-
 func Run() {
-
-
-	// For demo purposes, create two backend for os.Stderr.
-	backend1 := logging.NewLogBackend(os.Stderr, "", 0)
-	backend2 := logging.NewLogBackend(os.Stderr, "", 0)
-
-	// For messages written to backend2 we want to add some additional
-	// information to the output, including the used log level and the name of
-	// the function.
-	backend2Formatter := logging.NewBackendFormatter(backend2, format)
-
-	// Only errors and more severe messages should be sent to backend1
-	backend1Leveled := logging.AddModuleLevel(backend1)
-	backend1Leveled.SetLevel(logging.ERROR, "")
-
-	// Set the backends to be used.
-	logging.SetBackend(backend1Leveled, backend2Formatter)
 
 	gob.Register(&state.App{})
 	box = packr.New(assetsFolder, "../static")
 
 	err = state.SetupFileStructure(box)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to setup file structure : %s", err)
 	}
 
 	db, err = storm.Open(state.DbLocation())
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to open database : %s", err)
 	}
 	defer db.Close()
 
 	// must setup the basic hashes and settings for application to function
 	settings, err = models.InitSettings(db)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to init settings : %s", err)
 	}
 
 	err = models.Reindex(db)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to reindex db : %s", err)
 	}
 
 	fss = sessions.NewFilesystemStore(state.SessionLocation(), settings.SessionHash, settings.SessionBlock)
@@ -190,9 +163,15 @@ func Run() {
 	n.Use(negroni.HandlerFunc(after))
 
 	go func() {
-		time.Sleep(3 * time.Second)
+		time.Sleep(1 * time.Second)
 		log.Infof("Listening on...%s\n", settings.Host)
+		err := browser.OpenURL(settings.URI)
+		if err != nil {
+			log.Error(err)
+		}
 	}()
+
+	log.Debug(settings.URI)
 	log.Fatal(http.ListenAndServe(settings.Host, n))
 }
 
@@ -201,6 +180,7 @@ func Run() {
 // proceed with using the application
 func forceSetup(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Debug("ForceSetup")
 		app := r.Context().Value(state.AppStateKey).(*state.App)
 		var user models.User
 		err := db.One("ID", 1, &user)
@@ -250,6 +230,7 @@ func isAuthenticatedWithToken(next http.Handler) http.Handler {
 
 func before(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
+	log.Debug("before")
 	// setup session and if it errors, create a new session
 	sess, err := fss.Get(r, sessionName)
 	if err != nil {

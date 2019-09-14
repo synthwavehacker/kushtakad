@@ -12,6 +12,7 @@ import (
 )
 
 func IndexCheckr(w http.ResponseWriter, r *http.Request) {
+	log.Debug("Index Checkr")
 	http.Redirect(w, r, "/login", 302)
 	return
 }

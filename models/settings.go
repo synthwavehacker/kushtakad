@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"os"
 
@@ -19,6 +18,25 @@ type Settings struct {
 	CsrfHash     []byte `json:"csrf_hash"`
 	Host         string
 	Scheme       string
+	URI          string
+}
+
+func BuildURI(db *storm.DB) string {
+	var scheme, host string
+	st, err := FindSettings(db)
+	if err != nil {
+
+		log.Error(err)
+	}
+
+	if os.Getenv("KUSHTAKA_ENV") == "development" {
+		scheme = "http"
+		host = "localhost:3000"
+	} else {
+		scheme = st.Scheme
+		host = st.Host
+	}
+	return fmt.Sprintf("%s://%s", scheme, host)
 }
 
 func InitSettings(db *storm.DB) (Settings, error) {
@@ -49,6 +67,9 @@ func InitSettings(db *storm.DB) (Settings, error) {
 		s.Scheme = "http"
 	}
 
+	s.URI = BuildURI(db)
+
+	log.Debug("InitSettings")
 	err := db.Save(&s)
 	if err != nil {
 		return s, err
@@ -56,8 +77,6 @@ func InitSettings(db *storm.DB) (Settings, error) {
 
 	return s, nil
 }
-
-
 
 func FindSettings(db *storm.DB) (*Settings, error) {
 	var s Settings

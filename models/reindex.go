@@ -1,9 +1,8 @@
 package models
 
 import (
-
-	"github.com/kushtaka/kushtakad/events"
 	"github.com/asdine/storm"
+	"github.com/kushtaka/kushtakad/events"
 )
 
 // On startup reindex is called, though a bit dangerous, this is required

@@ -7,7 +7,6 @@ import (
 	"html"
 	"html/template"
 	"net/http"
-	"os"
 	"path"
 	"strings"
 	"time"
@@ -15,6 +14,7 @@ import (
 	"github.com/asdine/storm"
 	packr "github.com/gobuffalo/packr/v2"
 	"github.com/gorilla/sessions"
+	"github.com/kushtaka/kushtakad/helpers"
 	"github.com/kushtaka/kushtakad/models"
 	"github.com/unrolled/render"
 )
@@ -43,6 +43,7 @@ type App struct {
 func tmplFuncs() []template.FuncMap {
 	funks := []template.FuncMap{}
 	var fns = template.FuncMap{
+		"prettytime": helpers.PrettyTime,
 		"plus1": func(x int) int {
 			return x + 1
 		},
@@ -150,44 +151,13 @@ func (app *App) RestoreUser() {
 }
 
 func (app *App) RestoreURI() {
-	var scheme, host string
-	st, err := models.FindSettings(app.DB)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if os.Getenv("KUSHTAKA_ENV") == "development" {
-		scheme = "http"
-		host = "localhost:3000"
-	} else {
-		scheme = st.Scheme
-		host = st.Host
-	}
-	uri := fmt.Sprintf("%s://%s", scheme, host)
-	app.View.URI = uri
+	app.View.URI = models.BuildURI(app.DB)
 }
 
 func (app *App) RestoreState() {
 	st := models.NewState(app.User, app.DB)
 	app.View.State = st
 }
-
-/*
-func (app *App) restoreView() {
-	val := app.Session.Values[ViewStateKey]
-	if b, ok := val.([]byte); ok {
-		var vd = NewView()
-		err := json.Unmarshal(b, &vd)
-		if err != nil {
-			log.Println(err)
-		}
-
-		// clear the flashes and active
-		app.prepFlashes()
-		app.View = vd
-	}
-}
-*/
 
 func (v *View) Clear() {
 	v = &View{}
