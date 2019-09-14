@@ -17,7 +17,6 @@ import (
 	"github.com/kushtaka/kushtakad/models"
 	"github.com/kushtaka/kushtakad/state"
 	"github.com/op/go-logging"
-	"github.com/pkg/browser"
 	"github.com/urfave/negroni"
 )
 
@@ -50,15 +49,15 @@ func Run() {
 	}
 	defer db.Close()
 
+	err = models.Reindex(db)
+	if err != nil {
+		log.Fatalf("Failed to reindex db : %s", err)
+	}
+
 	// must setup the basic hashes and settings for application to function
 	settings, err = models.InitSettings(db)
 	if err != nil {
 		log.Fatalf("Failed to init settings : %s", err)
-	}
-
-	err = models.Reindex(db)
-	if err != nil {
-		log.Fatalf("Failed to reindex db : %s", err)
 	}
 
 	fss = sessions.NewFilesystemStore(state.SessionLocation(), settings.SessionHash, settings.SessionBlock)
@@ -165,10 +164,12 @@ func Run() {
 	go func() {
 		time.Sleep(1 * time.Second)
 		log.Infof("Listening on...%s\n", settings.Host)
-		err := browser.OpenURL(settings.URI)
-		if err != nil {
-			log.Error(err)
-		}
+		/*
+			err := browser.OpenURL(settings.URI)
+			if err != nil {
+				log.Error(err)
+			}
+		*/
 	}()
 
 	log.Debug(settings.URI)

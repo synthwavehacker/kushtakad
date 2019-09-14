@@ -25,7 +25,6 @@ func BuildURI(db *storm.DB) string {
 	var scheme, host string
 	st, err := FindSettings(db)
 	if err != nil {
-
 		log.Error(err)
 	}
 
@@ -81,10 +80,7 @@ func InitSettings(db *storm.DB) (Settings, error) {
 func FindSettings(db *storm.DB) (*Settings, error) {
 	var s Settings
 	err := db.One("ID", SettingsID, &s)
-	if err != nil {
-		return nil, err
-	}
-	return &s, nil
+	return &s, err
 }
 
 // Get preferred outbound ip of this machine
