@@ -17,6 +17,7 @@ import (
 	"github.com/kushtaka/kushtakad/models"
 	"github.com/kushtaka/kushtakad/state"
 	"github.com/op/go-logging"
+	"github.com/pkg/browser"
 	"github.com/urfave/negroni"
 )
 
@@ -164,15 +165,13 @@ func Run() {
 	go func() {
 		time.Sleep(1 * time.Second)
 		log.Infof("Listening on...%s\n", settings.Host)
-		/*
-			err := browser.OpenURL(settings.URI)
-			if err != nil {
-				log.Error(err)
-			}
-		*/
+		err := browser.OpenURL("http://" + settings.Host)
+		if err != nil {
+			log.Error(err)
+		}
 	}()
 
-	log.Debug(settings.URI)
+	log.Debug(settings.Host)
 	log.Fatal(http.ListenAndServe(settings.Host, n))
 }
 

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type Response struct {
@@ -16,9 +17,10 @@ func (r *Response) AddService(serv interface{}) {
 }
 
 func NewResponse(s, msg string, err error) *Response {
+	newmsg := fmt.Sprintf("%s > %s", msg, err.Error())
 	return &Response{
 		Status:  s,
-		Message: msg,
+		Message: newmsg,
 		Err:     err,
 	}
 }

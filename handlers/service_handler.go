@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/asdine/storm"
 	"github.com/gorilla/mux"
 	"github.com/kushtaka/kushtakad/models"
 	"github.com/kushtaka/kushtakad/service/telnet"
@@ -146,58 +147,18 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cfg := models.ServiceCfg{}
-	switch serviceType {
-	case "telnet":
-		decoder := json.NewDecoder(r.Body)
-		var tel telnet.TelnetService
-		err = decoder.Decode(&tel)
-		if err != nil {
-			resp = NewResponse("error", "Unable to decode response body", err)
-			w.Write(resp.JSON())
-		}
-		tel.Prompt = "$ "
-
-		if tel.Port == 0 {
-			tx.Rollback()
-			resp = NewResponse("error", "Port must be specified", err)
-			w.Write(resp.JSON())
-			return
-		}
-
-		err = tx.Save(&tel)
-		if err != nil {
-			tx.Rollback()
-			resp = NewResponse("error", "Unable to save telnet service", err)
-			w.Write(resp.JSON())
-			return
-		}
-
-		for _, v := range sensor.Cfgs {
-			if v.Port == tel.Port {
-				tx.Rollback()
-				r := NewResponse("error", "Port is already assigned to another service", err)
-				w.Write(r.JSON())
-				return
-			}
-		}
-
-		cfg.ServiceID = tel.ID
-		cfg.SensorID = sensor.ID
-		cfg.Type = serviceType
-		cfg.Port = tel.Port
-
-	default:
+	cfg, err := CreateService(serviceType, sensor, r, tx)
+	if err != nil {
 		tx.Rollback()
-		resp = NewResponse("error", "unable to find service type", err)
-		w.Write(resp.JSON())
+		r := NewResponse("error", "Unable to create service", err)
+		w.Write(r.JSON())
 		return
 	}
 
 	err = tx.Save(&cfg)
 	if err != nil {
 		tx.Rollback()
-		r := NewResponse("error", "unable to save service configuration", err)
+		r := NewResponse("error", "Unable to save service configuration", err)
 		w.Write(r.JSON())
 		return
 	}
@@ -206,7 +167,7 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 	err = tx.Update(&sensor)
 	if err != nil {
 		tx.Rollback()
-		r := NewResponse("error", "unable to update sensor", err)
+		r := NewResponse("error", "Unable to update sensor", err)
 		w.Write(r.JSON())
 		return
 	}
@@ -223,4 +184,43 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 	resp.Status = "success"
 	resp.Message = "Service Saved"
 	w.Write(resp.JSON())
+}
+
+func CreateService(stype string, sensor models.Sensor, r *http.Request, tx storm.Node) (models.ServiceCfg, error) {
+	var err error
+	var cfg models.ServiceCfg
+	switch stype {
+	case "telnet":
+		decoder := json.NewDecoder(r.Body)
+		var tel telnet.TelnetService
+		err = decoder.Decode(&tel)
+		if err != nil {
+			return cfg, fmt.Errorf("Unable to decode json : %w", err)
+		}
+		tel.Prompt = "$ "
+
+		if tel.Port == 0 {
+			return cfg, fmt.Errorf("Port must be specified")
+		}
+
+		err = tx.Save(&tel)
+		if err != nil {
+			return cfg, fmt.Errorf("Unable to save telnet service : %w", err)
+		}
+
+		for _, v := range sensor.Cfgs {
+			if v.Port == tel.Port {
+				return cfg, fmt.Errorf("Port is already assigned to another service : %w", err)
+			}
+		}
+
+		cfg.ServiceID = tel.ID
+		cfg.SensorID = sensor.ID
+		cfg.Type = stype
+		cfg.Port = tel.Port
+
+	default:
+		return cfg, fmt.Errorf("Unable to find service type")
+	}
+	return cfg, nil
 }
