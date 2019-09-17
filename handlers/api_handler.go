@@ -1,10 +1,10 @@
 package handlers
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"strings"
-	"io/ioutil"
-	"encoding/json"
 
 	"github.com/kushtaka/kushtakad/events"
 	"github.com/kushtaka/kushtakad/models"

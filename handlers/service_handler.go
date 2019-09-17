@@ -191,13 +191,13 @@ func CreateService(stype string, sensor models.Sensor, r *http.Request, tx storm
 	var cfg models.ServiceCfg
 	switch stype {
 	case "telnet":
-		decoder := json.NewDecoder(r.Body)
 		var tel telnet.TelnetService
+		tel.Prompt = "$ "
+		decoder := json.NewDecoder(r.Body)
 		err = decoder.Decode(&tel)
 		if err != nil {
 			return cfg, fmt.Errorf("Unable to decode json : %w", err)
 		}
-		tel.Prompt = "$ "
 
 		if tel.Port == 0 {
 			return cfg, fmt.Errorf("Port must be specified")

@@ -6,6 +6,7 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -162,12 +163,15 @@ func Run() {
 	n.UseHandler(rtr)
 	n.Use(negroni.HandlerFunc(after))
 
+	env := os.Getenv("KUSHTAKA_ENV")
 	go func() {
 		time.Sleep(1 * time.Second)
 		log.Infof("Listening on...%s\n", settings.Host)
-		err := browser.OpenURL("http://" + settings.Host)
-		if err != nil {
-			log.Error(err)
+		if env != "development" {
+			err := browser.OpenURL(settings.URI)
+			if err != nil {
+				log.Error(err)
+			}
 		}
 	}()
 
@@ -180,7 +184,6 @@ func Run() {
 // proceed with using the application
 func forceSetup(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Debug("ForceSetup")
 		app := r.Context().Value(state.AppStateKey).(*state.App)
 		var user models.User
 		err := db.One("ID", 1, &user)
@@ -230,7 +233,6 @@ func isAuthenticatedWithToken(next http.Handler) http.Handler {
 
 func before(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
-	log.Debug("before")
 	// setup session and if it errors, create a new session
 	sess, err := fss.Get(r, sessionName)
 	if err != nil {

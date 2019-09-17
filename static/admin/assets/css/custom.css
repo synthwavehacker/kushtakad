@@ -287,9 +287,14 @@ input:not([type]):focus:not([readonly]) + label, input[type="text"]:focus:not([r
 
 #parent-flash {
   padding-top: 50px;
-  padding-left: 40px;
-  padding-right: 40px;
+  padding-left: 10px;
+  padding-right: 10px;
   width: 100%;
   position: fixed;
   z-index: 999999;
+}
+
+#flashy {
+  margin: 0 auto;
+  max-width: 1100px;
 }

@@ -42,4 +42,5 @@ require (
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
 	golang.org/x/sys v0.0.0-20190913121621-c3b328c6e5a7 // indirect
 	golang.org/x/tools v0.0.0-20190913181337-0240832f5c3d // indirect
+	gopkg.in/jordan-wright/email.v1 v1.0.0-20150827023900-a3d0a1a81cdc
 )
