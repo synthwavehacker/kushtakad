@@ -10,7 +10,6 @@ import (
 	"image/gif"
 	"image/jpeg"
 	"image/png"
-	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -36,7 +35,7 @@ func GetFileContentType(out *os.File) (string, error) {
 func ValidateImage(b []byte) (string, error) {
 
 	m := http.DetectContentType(b)
-	log.Println("MIMETYPE: ", m)
+	log.Debug("MIMETYPE: ", m)
 	switch m {
 	case "image/jpeg":
 		return "jpg", nil
@@ -51,7 +50,7 @@ func ValidateImage(b []byte) (string, error) {
 func ValidateMimeType(b []byte) string {
 
 	m := http.DetectContentType(b)
-	log.Println("MIMETYPE: ", m)
+	log.Debug("MIMETYPE: ", m)
 	switch m {
 	case "image/jpeg":
 		return "jpg"
@@ -97,7 +96,7 @@ func WidthHeight(img image.Image, maxWidth uint, maxHeight uint) (uint, uint) {
 	origHeight := uint(origBounds.Dy())
 	newWidth, newHeight := origWidth, origHeight
 
-	log.Println("NW:NH ", newWidth, newHeight)
+	log.Debug("NW:NH ", newWidth, newHeight)
 	if newWidth > newHeight {
 		diff := newHeight - maxHeight
 		return newWidth - diff, maxHeight
@@ -236,7 +235,7 @@ func FormatGif(width uint, height uint, src string, full_path string, crop bool)
 	//if err != nil || len(out) > 0 { return err }
 
 	t1 := time.Now()
-	log.Printf("The call took %v to run.\n", t1.Sub(t0))
+	log.Debugf("The call took %v to run.\n", t1.Sub(t0))
 	return nil
 }
 

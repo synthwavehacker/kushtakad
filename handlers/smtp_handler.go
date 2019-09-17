@@ -81,16 +81,17 @@ func PostSmtp(w http.ResponseWriter, r *http.Request) {
 }
 
 func PostSendTestEmail(w http.ResponseWriter, r *http.Request) {
+	log.Debug("PostSendTestEmail")
 	w.Header().Set("Content-Type", "application/json")
 	app, err := state.Restore(r)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Unable to restore app : %s", err)
 	}
 
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Error(err)
-		app.Render.JSON(w, 404, err)
+		app.Render.JSON(w, 200, err)
 		return
 	}
 	defer r.Body.Close()
@@ -99,13 +100,18 @@ func PostSendTestEmail(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(b, smtp)
 	if err != nil {
 		log.Error(err)
-		app.Render.JSON(w, 404, err)
+		app.Render.JSON(w, 200, err)
 		return
 	}
 
 	m := helpers.NewMailer(app.DB, app.Box)
 	m.Smtp = smtp
-	m.SendSensorEvent("1", "furl", "1", "new", "jfolkins@gmail.com", time.Now())
+	err = m.SendSensorEvent("1", "furl", "1", "new", "jfolkins@gmail.com", time.Now())
+	if err != nil {
+		log.Errorf("Failed to send email %s", err)
+		app.Render.JSON(w, 200, NewResponse("failed", "Failed to send email", err))
+		return
+	}
 	resp := &Response{}
 	resp.Status = "success"
 	resp.Message = "Email Sent"

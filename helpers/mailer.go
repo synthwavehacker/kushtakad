@@ -5,7 +5,6 @@ import (
 
 	"bytes"
 	"fmt"
-	"log"
 	"net/smtp"
 	"path/filepath"
 	"text/template"
@@ -33,14 +32,13 @@ type Mailer struct {
 }
 
 func NewMailer(db *storm.DB, box *packr.Box) *Mailer {
-
 	smtp := &models.Smtp{}
 	err := db.One("ID", 1, smtp)
 	if err != nil {
-		log.Fatal(err)
+		log.Debugf("Smtp values are net set %v", err)
 	}
 
-	m := &Mailer{Smtp: smtp}
+	m := &Mailer{Smtp: smtp, Box: box, DB: db}
 	return m
 }
 
@@ -50,14 +48,15 @@ func (m *Mailer) SendSensorEvent(eventid, furl, hashid, state, emailtext string,
 	fp := filepath.Join("admin", "email", fname)
 	mt, err := m.Box.Find(fp)
 	if err != nil {
-		return err
+		log.Debugf("Unable to find template in packr box %v", err)
 	}
+
+	uri := models.BuildURI(m.DB)
 	m.Subject = fmt.Sprintf("%s : %s", furl, eventid)
 	m.Text = fmt.Sprintf("Event: %s <br>\n\nState: %s<br>\n\n", furl, state)
-	m.EventLink = models.BuildURI(m.DB) + "/kushtaka/%s"
+	m.EventLink = uri + "/kushtaka/%s"
 	m.TemplateName = "EventSensor"
 	m.TemplateFile = fname
-
 	m.EventLink = fmt.Sprintf(m.EventLink, m.EventID)
 	e := email.NewEmail()
 	e.From = m.Smtp.Email
@@ -76,8 +75,8 @@ func (m *Mailer) SendSensorEvent(eventid, furl, hashid, state, emailtext string,
 		smtp.PlainAuth(
 			"",
 			m.Smtp.Username,
-			"",
 			m.Smtp.Password,
+			m.Smtp.Host,
 		),
 	)
 	return err

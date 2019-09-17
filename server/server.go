@@ -118,6 +118,7 @@ func Run() {
 	// smtp
 	kushtaka.HandleFunc("/smtp", handlers.GetSmtp).Methods("GET")
 	kushtaka.HandleFunc("/smtp", handlers.PostSmtp).Methods("POST")
+	kushtaka.HandleFunc("/smtp/test", handlers.PostSendTestEmail).Methods("POST")
 
 	// users
 	kushtaka.HandleFunc("/users/page/{pid}/limit/{oid}", handlers.GetUsers).Methods("GET")
@@ -176,6 +177,7 @@ func Run() {
 	}()
 
 	log.Debug(settings.Host)
+	log.Debug(settings.URI)
 	log.Fatal(http.ListenAndServe(settings.Host, n))
 }
 
