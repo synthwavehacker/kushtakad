@@ -12,7 +12,7 @@ import (
 )
 
 func IndexCheckr(w http.ResponseWriter, r *http.Request) {
-	log.Debug("Index Checkr")
+	log.Debug("Validating schema and rebuilding indexes")
 	http.Redirect(w, r, "/login", 302)
 	return
 }

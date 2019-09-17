@@ -68,15 +68,14 @@ func PostSensors(w http.ResponseWriter, r *http.Request) {
 
 	tx, err := app.DB.Begin(true)
 	if err != nil {
-		tx.Rollback()
 		app.Fail(err.Error())
 		http.Redirect(w, r, redir, 302)
 		return
 	}
+	defer tx.Rollback()
 
 	tx.One("Name", name, &sensor)
 	if sensor.ID > 0 {
-		tx.Rollback()
 		app.Fail("Sensor using that name already exists.")
 		http.Redirect(w, r, redir, 302)
 		return
@@ -84,7 +83,6 @@ func PostSensors(w http.ResponseWriter, r *http.Request) {
 
 	err = tx.Save(sensor)
 	if err != nil {
-		tx.Rollback()
 		app.Fail(err.Error())
 		http.Redirect(w, r, redir, 302)
 		return
@@ -92,7 +90,6 @@ func PostSensors(w http.ResponseWriter, r *http.Request) {
 
 	err = tx.Commit()
 	if err != nil {
-		tx.Rollback()
 		app.Fail(err.Error())
 		http.Redirect(w, r, redir, 302)
 		return

@@ -1,8 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
+	"time"
 
+	"github.com/kushtaka/kushtakad/helpers"
 	"github.com/kushtaka/kushtakad/models"
 	"github.com/kushtaka/kushtakad/state"
 )
@@ -55,6 +59,7 @@ func PostSmtp(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/kushtaka/smtp", 302)
 		return
 	}
+	defer tx.Rollback()
 
 	err = tx.Save(smtp)
 	if err != nil {
@@ -75,12 +80,35 @@ func PostSmtp(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func PutSmtp(w http.ResponseWriter, r *http.Request) {
-	log.Error("PutSmtp()")
-	return
-}
+func PostSendTestEmail(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	app, err := state.Restore(r)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-func DeleteSmtp(w http.ResponseWriter, r *http.Request) {
-	log.Error("DeleteSmtp()")
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Error(err)
+		app.Render.JSON(w, 404, err)
+		return
+	}
+	defer r.Body.Close()
+
+	smtp := &models.Smtp{}
+	err = json.Unmarshal(b, smtp)
+	if err != nil {
+		log.Error(err)
+		app.Render.JSON(w, 404, err)
+		return
+	}
+
+	m := helpers.NewMailer(app.DB, app.Box)
+	m.Smtp = smtp
+	m.SendSensorEvent("1", "furl", "1", "new", "jfolkins@gmail.com", time.Now())
+	resp := &Response{}
+	resp.Status = "success"
+	resp.Message = "Email Sent"
+	w.Write(resp.JSON())
 	return
 }

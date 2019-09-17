@@ -51,15 +51,14 @@ func PostTokens(w http.ResponseWriter, r *http.Request) {
 
 	tx, err := app.DB.Begin(true)
 	if err != nil {
-		tx.Rollback()
 		app.Fail(err.Error())
 		http.Redirect(w, r, redirUrl, 302)
 		return
 	}
+	defer tx.Rollback()
 
 	tx.One("Name", name, token)
 	if token.ID > 0 {
-		tx.Rollback()
 		app.Fail("Token using that name already exists.")
 		http.Redirect(w, r, redirUrl, 302)
 		return
@@ -67,7 +66,6 @@ func PostTokens(w http.ResponseWriter, r *http.Request) {
 
 	err = tx.Save(token)
 	if err != nil {
-		tx.Rollback()
 		app.Fail(err.Error())
 		http.Redirect(w, r, redirUrl, 302)
 		return
@@ -75,7 +73,6 @@ func PostTokens(w http.ResponseWriter, r *http.Request) {
 
 	err = tx.Commit()
 	if err != nil {
-		tx.Rollback()
 		app.Fail(err.Error())
 		http.Redirect(w, r, redirUrl, 302)
 		return

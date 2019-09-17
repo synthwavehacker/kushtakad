@@ -55,10 +55,10 @@ func PostTeams(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, redir, 302)
 		return
 	}
+	defer tx.Rollback()
 
 	tx.One("Name", name, team)
 	if team.ID > 0 {
-		tx.Rollback()
 		app.Fail("Team using that name already exists.")
 		http.Redirect(w, r, redir, 302)
 		return
@@ -66,7 +66,6 @@ func PostTeams(w http.ResponseWriter, r *http.Request) {
 
 	err = tx.Save(team)
 	if err != nil {
-		tx.Rollback()
 		app.Fail(err.Error())
 		http.Redirect(w, r, redir, 302)
 		return
@@ -74,7 +73,6 @@ func PostTeams(w http.ResponseWriter, r *http.Request) {
 
 	err = tx.Commit()
 	if err != nil {
-		tx.Rollback()
 		app.Fail(err.Error())
 		http.Redirect(w, r, redir, 302)
 		return
