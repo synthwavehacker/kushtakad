@@ -17,6 +17,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -26,12 +27,11 @@ import (
 	"github.com/kushtaka/kushtakad/listener"
 )
 
-
 func configureServices(h *Hub, svm []*ServiceMap) listener.SocketConfig {
 
 	sc := listener.SocketConfig{}
 	for _, sm := range svm {
-		log.Debug("AUTH ?", sm.Service)
+		log.Debugf("Configuring Service %s", sm.SensorName)
 		addr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort("localhost", sm.Port))
 		if err != nil {
 			log.Fatal(err)
@@ -57,6 +57,7 @@ func startSensor(auth *Auth, ctx context.Context, svm []*ServiceMap) {
 	}
 
 	go func() {
+		//TODO BenB: how to prevent this from eating so much CPU?
 		for {
 			conn, err := l.Accept()
 			if err != nil {
@@ -65,7 +66,7 @@ func startSensor(auth *Auth, ctx context.Context, svm []*ServiceMap) {
 
 			incoming <- conn
 
-			//runtime.Gosched() // in case of goroutine starvation // with many connection and single procs
+			runtime.Gosched() // in case of goroutine starvation // with many connection and single procs
 		}
 	}()
 

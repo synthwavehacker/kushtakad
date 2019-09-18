@@ -17,6 +17,8 @@ import (
 	email "gopkg.in/jordan-wright/email.v1"
 )
 
+const smtpID = 1
+
 type Mailer struct {
 	Smtp     *models.Smtp
 	Settings *models.Settings
@@ -31,36 +33,116 @@ type Mailer struct {
 	TemplateFile string
 }
 
+type SensorEvent struct {
+	ID int64
+}
+
+type TokenEvent struct {
+}
+
+type TestEvent struct {
+	Mailer *Mailer
+
+	Email *Email
+	Link  string
+}
+
+type Email struct {
+	Subject      string
+	Body         string
+	To           []string
+	From         string
+	TemplateName string
+	Filename     string
+	URI          string
+}
+
+func NewTestEvent(db *storm.DB, box *packr.Box) *TestEvent {
+	return &TestEvent{
+		Mailer: NewMailer(db, box),
+		Email:  &Email{},
+	}
+}
+
 func NewMailer(db *storm.DB, box *packr.Box) *Mailer {
 	smtp := &models.Smtp{}
-	err := db.One("ID", 1, smtp)
+	err := db.One("ID", smtpID, smtp)
 	if err != nil {
-		log.Debugf("Smtp values are net set %v", err)
+		log.Debugf("Smtp object not found in database %v", err)
 	}
 
 	m := &Mailer{Smtp: smtp, Box: box, DB: db}
 	return m
 }
 
+func buildTemplate(email *Email, box *packr.Box) ([]byte, error) {
+	var out bytes.Buffer
+	fullPath := filepath.Join("admin", "email", email.Filename)
+	templateBytes, err := box.Find(fullPath)
+	if err != nil {
+		return nil, err
+	}
+
+	t, err := template.New("MT").Parse(string(templateBytes))
+	if err != nil {
+		return nil, err
+	}
+
+	err = t.ExecuteTemplate(&out, email.TemplateName, email)
+	if err != nil {
+		return nil, err
+	}
+
+	return out.Bytes(), nil
+}
+
+func (te *TestEvent) SendTestEvent() error {
+	tmpl, err := buildTemplate(te.Email, te.Mailer.Box)
+	if err != nil {
+		return err
+	}
+
+	e := email.NewEmail()
+	e.From = te.Mailer.Smtp.Email
+	e.To = te.Email.To
+	e.Subject = te.Email.Subject
+	e.HTML = tmpl
+	err = e.Send(
+		fmt.Sprintf("%s:%s", te.Mailer.Smtp.Host, te.Mailer.Smtp.Port),
+		smtp.PlainAuth(
+			"",
+			te.Mailer.Smtp.Username,
+			te.Mailer.Smtp.Password,
+			te.Mailer.Smtp.Host,
+		),
+	)
+	log.Debug(err)
+	return err
+
+}
+
 func (m *Mailer) SendSensorEvent(eventid, furl, hashid, state, emailtext string, tt time.Time) error {
 
 	fname := "event_sensor.tmpl"
-	fp := filepath.Join("admin", "email", fname)
-	mt, err := m.Box.Find(fp)
-	if err != nil {
-		log.Debugf("Unable to find template in packr box %v", err)
-	}
-
 	uri := models.BuildURI(m.DB)
+
 	m.Subject = fmt.Sprintf("%s : %s", furl, eventid)
 	m.Text = fmt.Sprintf("Event: %s <br>\n\nState: %s<br>\n\n", furl, state)
 	m.EventLink = uri + "/kushtaka/%s"
 	m.TemplateName = "EventSensor"
 	m.TemplateFile = fname
 	m.EventLink = fmt.Sprintf(m.EventLink, m.EventID)
+
 	e := email.NewEmail()
 	e.From = m.Smtp.Email
 	e.To = []string{emailtext}
+
+	fp := filepath.Join("admin", "email", fname)
+	mt, err := m.Box.Find(fp)
+	if err != nil {
+		log.Debugf("Unable to find template in packr box %v", err)
+	}
+
 	t, err := template.New("MT").Parse(string(mt))
 	if err != nil {
 		return err

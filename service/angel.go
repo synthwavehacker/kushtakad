@@ -7,7 +7,7 @@ import (
 	"syscall"
 )
 
-type Angel struct {
+type ServiceAngel struct {
 	Auth         *Auth
 	AngelCtx     context.Context
 	AngelCancel  context.CancelFunc
@@ -28,10 +28,10 @@ func interuptor(cancel context.CancelFunc) {
 
 }
 
-func NewAngel(auth *Auth) *Angel {
+func NewServiceAngel(auth *Auth) *ServiceAngel {
 	angelCtx, angelCancel := context.WithCancel(context.Background())
 	sensorCtx, sensorCancel := context.WithCancel(context.Background())
-	angel := &Angel{
+	angel := &ServiceAngel{
 		Auth:         auth,
 		AngelCtx:     angelCtx,
 		AngelCancel:  angelCancel,
@@ -57,7 +57,7 @@ func Run(host, apikey string) {
 	}
 	log.Info(svm)
 
-	angel := NewAngel(auth)
+	angel := NewServiceAngel(auth)
 	startSensor(auth, angel.SensorCtx, svm)
 
 	for {

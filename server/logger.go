@@ -1,10 +1,10 @@
-package service
+package server
 
 import (
 	"github.com/op/go-logging"
 )
 
-var log = logging.MustGetLogger("sensors")
+var log = logging.MustGetLogger("server")
 
 // Example format string. Everything except the message has a custom color
 // which is dependent on the log level. Many fields have a custom output

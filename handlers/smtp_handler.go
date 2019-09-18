@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -80,9 +81,12 @@ func PostSmtp(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+const testSubject = "Test Event from Kushtaka"
+const testFilename = "test_event.tmpl"
+const testTemplateName = "TestEvent"
+
 func PostSendTestEmail(w http.ResponseWriter, r *http.Request) {
 	log.Debug("PostSendTestEmail")
-	w.Header().Set("Content-Type", "application/json")
 	app, err := state.Restore(r)
 	if err != nil {
 		log.Fatalf("Unable to restore app : %s", err)
@@ -104,17 +108,23 @@ func PostSendTestEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	m := helpers.NewMailer(app.DB, app.Box)
-	m.Smtp = smtp
-	err = m.SendSensorEvent("1", "furl", "1", "new", "jfolkins@gmail.com", time.Now())
+	te := helpers.NewTestEvent(app.DB, app.Box)
+	te.Email.Subject = fmt.Sprintf("%s : %s", testSubject, time.Now())
+	te.Email.To = []string{app.User.Email}
+	te.Email.Filename = testFilename
+	te.Email.TemplateName = testTemplateName
+	te.Mailer.Smtp = smtp
+
+	err = te.SendTestEvent()
 	if err != nil {
 		log.Errorf("Failed to send email %s", err)
 		app.Render.JSON(w, 200, NewResponse("failed", "Failed to send email", err))
 		return
 	}
+
 	resp := &Response{}
 	resp.Status = "success"
-	resp.Message = "Email Sent"
+	resp.Message = "Email sent successfully"
 	w.Write(resp.JSON())
 	return
 }

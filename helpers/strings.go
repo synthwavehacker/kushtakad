@@ -41,30 +41,3 @@ func PrettifyString(s string) string {
 	s = strings.ToLower(strings.Trim(s, "-"))
 	return s
 }
-
-/*
-
-func EncodeHashIds(i64 int64, salt string) (string, error) {
-	hd := hashids.NewData()
-	hd.Salt = salt
-	hd.MinLength = ml
-	h := hashids.NewWithData(hd)
-	s, err := h.EncodeInt64([]int64{i64})
-	if err != nil {
-		return "", err
-	}
-	return s, nil
-}
-
-func DecodeHashIds(s string, salt string) (int64, error) {
-	hd := hashids.NewData()
-	hd.Salt = salt
-	hd.MinLength = ml
-	h := hashids.NewWithData(hd)
-	i64, err := h.DecodeInt64WithError(s)
-	if err != nil {
-		return 0, err
-	}
-	return i64[0], err
-}
-*/

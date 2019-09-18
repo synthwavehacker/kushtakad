@@ -17,7 +17,6 @@ import (
 	"github.com/kushtaka/kushtakad/handlers"
 	"github.com/kushtaka/kushtakad/models"
 	"github.com/kushtaka/kushtakad/state"
-	"github.com/op/go-logging"
 	"github.com/pkg/browser"
 	"github.com/urfave/negroni"
 )
@@ -26,7 +25,6 @@ const assetsFolder = "static"
 const sessionName = "_kushtaka"
 
 var (
-	log      = logging.MustGetLogger("main")
 	rtr      *mux.Router
 	fss      *sessions.FilesystemStore
 	db       *storm.DB
@@ -35,7 +33,7 @@ var (
 	err      error
 )
 
-func Run() {
+func RunServer() {
 
 	gob.Register(&state.App{})
 	box = packr.New(assetsFolder, "../static")

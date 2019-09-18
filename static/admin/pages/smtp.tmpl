@@ -1,9 +1,9 @@
 <div class="row">
-    <div class="col s12 m6 l6">
+    <div class="col s12 m12 l12">
         <form class="tform z-depth-1" method="post" action="/kushtaka/smtp">
 
             <div class="row">
-                <h5 class="col s12 m12 112">SMTP</h5>
+                <h5 class="col s12 m12 l12">SMTP</h5>
             </div>
 
             <div class="row">
@@ -33,7 +33,7 @@
                 </div>
 
                 <div class="input-field col s12 m12 112">
-                    <input id="password" type="text" name="password" value="{{ .Forms.Smtp.Password }}">
+                    <input id="password" type="password" name="password" value="{{ .Forms.Smtp.Password }}">
                     <label for="password" data-error="required: 12 characters" data-success="valid">Password</label>
                 </div>
             </div>
@@ -106,6 +106,8 @@
     function postTestEmail(type) {
         var url = uri + "test";
         var data = getForm();
+        M.toast({html: "Trying to send...", classes: 'orange lighten-1'})
+
         console.log(data);
         postData(data, url, type);
     }
@@ -127,7 +129,6 @@
     function respFunc(resp) {
         if (resp.Status === "success") {
             M.toast({html: resp.Message , classes: 'green lighten-1'})
-            instance.close();
         } else {
             M.toast({html: resp.Message , classes: 'red lighten-1'})
         }
