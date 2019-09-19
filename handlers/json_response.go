@@ -17,7 +17,12 @@ func (r *Response) AddService(serv interface{}) {
 }
 
 func NewResponse(s, msg string, err error) *Response {
-	newmsg := fmt.Sprintf("%s > %s", msg, err.Error())
+	var newmsg string
+	if err != nil {
+		newmsg = fmt.Sprintf("%s > %s", msg, err.Error())
+	} else {
+		newmsg = fmt.Sprintf("%s", msg)
+	}
 	return &Response{
 		Status:  s,
 		Message: newmsg,

@@ -139,7 +139,7 @@ func RunServer(r chan bool) *http.Server {
 
 	// https
 	kushtaka.HandleFunc("/https", handlers.GetHttps).Methods("GET")
-	kushtaka.HandleFunc("/https", handlers.PostHttps).Methods("POST")
+	kushtaka.HandleFunc("/https/reboot", handlers.PostHttps).Methods("POST")
 
 	// wire up sub routers
 	rtr.PathPrefix("/login").Handler(negroni.New(

@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col s12 m12 l12">
-        <form class="tform z-depth-1">
+        <div class="marjen z-depth-1">
 
             <div class="row">
                 <h5 class="col s12 m12 l12">Automatic Https</h5>
@@ -12,14 +12,14 @@
                     <label for="fqdn" data-error="example: Admin" data-success="valid">FQDN</label>
                     <span class="helper-text" data-error="wrong" data-success="right">example: (test.example.com, kushtaka.example.com, www.example.com)</span>
                 </div>
+            </div>
 
             <div class="row">
                 <div class="col s12 m8 18">
                     <button onclick="postReboot()" class="waves-effect waves-light teal lighten-1 btn">Save</button>
                 </div>
             </div>
-
-        </form>
+        </div>
     </div>
 </div>
 <div class="col s12 m6 l6"></div>
@@ -29,7 +29,6 @@
 
 
     var uri = "{{ .URI }}/kushtaka/https/reboot";
- 
 
     function getForm() {
         return {
@@ -38,12 +37,12 @@
     }
 
     function postReboot() {
-        var url = uri;
         var data = getForm();
         M.toast({html: "Trying to send...", classes: 'orange lighten-1'})
 
+        console.log(uri);
         console.log(data);
-        postData(data, url);
+        postData(data, uri);
     }
 
 

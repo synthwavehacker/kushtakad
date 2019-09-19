@@ -56,10 +56,9 @@ func Run() {
 		case <-sa.AngelCtx.Done(): // if the angel's context is closed
 			log.Info("shutting down Angel...done.")
 			sa.Server.Shutdown(sa.ServerCtx)
-			log.Info("shutting down Server...done.")
 			return
 		case <-sa.ServerCtx.Done(): // if the angel's context is closed
-			log.Info("shutting down ServerAngel...done.")
+			log.Info("shutting down ServerCtx...done.")
 			return
 		}
 		//default:
