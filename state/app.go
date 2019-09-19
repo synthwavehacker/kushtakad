@@ -38,6 +38,7 @@ type App struct {
 	User      *models.User
 	Render    *render.Render
 	ServerHub *ServerHub
+	Reboot    chan bool
 }
 
 func tmplFuncs() []template.FuncMap {
@@ -84,7 +85,7 @@ func NewRender(layout string, box *packr.Box) *render.Render {
 
 // NewApp returns and instance of App
 // App instances live during the lifecycle of a single http request
-func NewApp(w http.ResponseWriter, r *http.Request, db *storm.DB, sess *sessions.Session, fss *sessions.FilesystemStore, box *packr.Box) (*App, error) {
+func NewApp(w http.ResponseWriter, r *http.Request, db *storm.DB, sess *sessions.Session, fss *sessions.FilesystemStore, box *packr.Box, reboot chan bool) (*App, error) {
 
 	ren := NewRender("admin/layouts/main", box)
 	settings, err := models.FindSettings(db)
@@ -107,6 +108,7 @@ func NewApp(w http.ResponseWriter, r *http.Request, db *storm.DB, sess *sessions
 		Settings:  settings,
 		View:      NewView(),
 		User:      &models.User{},
+		Reboot:    reboot,
 	}, nil
 
 }

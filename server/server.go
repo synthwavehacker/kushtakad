@@ -30,13 +30,14 @@ var (
 	db       *storm.DB
 	box      *packr.Box
 	settings models.Settings
+	reboot   chan bool
 	err      error
 )
 
-func RunServer() {
-
+func RunServer(r chan bool) *http.Server {
 	gob.Register(&state.App{})
 	box = packr.New(assetsFolder, "../static")
+	reboot = r
 
 	err = state.SetupFileStructure(box)
 	if err != nil {
@@ -47,7 +48,6 @@ func RunServer() {
 	if err != nil {
 		log.Fatalf("Failed to open database : %s", err)
 	}
-	defer db.Close()
 
 	err = models.Reindex(db)
 	if err != nil {
@@ -137,9 +137,9 @@ func RunServer() {
 	kushtaka.HandleFunc("/team/{id}", handlers.PutTeam).Methods("PUT")
 	kushtaka.HandleFunc("/team/{id}", handlers.DeleteTeam).Methods("DELETE")
 
-	// settings
-	//kushtaka.HandleFunc("/settings", handlers.ReadSettings).Methods("GET")
-	//kushtaka.HandleFunc("/settings", handlers.ReadSettings).Methods("POST")
+	// https
+	kushtaka.HandleFunc("/https", handlers.GetHttps).Methods("GET")
+	kushtaka.HandleFunc("/https", handlers.PostHttps).Methods("POST")
 
 	// wire up sub routers
 	rtr.PathPrefix("/login").Handler(negroni.New(
@@ -162,6 +162,16 @@ func RunServer() {
 	n.UseHandler(rtr)
 	n.Use(negroni.HandlerFunc(after))
 
+	srv := setup(settings, n)
+	go func() {
+		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+			log.Fatalf("The http servier died :%s", err)
+		}
+	}()
+	return srv
+}
+
+func setup(settings models.Settings, n *negroni.Negroni) *http.Server {
 	env := os.Getenv("KUSHTAKA_ENV")
 	go func() {
 		time.Sleep(1 * time.Second)
@@ -174,9 +184,9 @@ func RunServer() {
 		}
 	}()
 
-	log.Debug(settings.Host)
-	log.Debug(settings.URI)
-	log.Fatal(http.ListenAndServe(settings.Host, n))
+	log.Debugf("settings.Host %s", settings.Host)
+	log.Debugf("settings.URI %s", settings.URI)
+	return &http.Server{Addr: settings.Host, Handler: n}
 }
 
 // forceSetup is a middleware function that makes sure
@@ -241,7 +251,7 @@ func before(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	}
 	sess.Options.HttpOnly = true
 
-	app, err := state.NewApp(w, r, db, sess, fss, box)
+	app, err := state.NewApp(w, r, db, sess, fss, box, reboot)
 	if err != nil {
 		log.Fatal(err)
 	}

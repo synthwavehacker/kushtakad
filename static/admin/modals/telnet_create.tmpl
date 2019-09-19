@@ -1,0 +1,42 @@
+{{ define "admin/modals/telnet_create" }}
+
+ <!-- Telnet Modal Structures -->
+ <div id="telnet-modal" class="modal-gap modal">
+    <div class="modal-content">
+
+            <div class="row">
+                <h5 class="col">Add Telnet Service</h5>
+            </div>
+
+            <div class="row">
+                <div class="input-field col s2">
+                    <input id="telnet-port" type="text" name="telnet-port" value="" required class="validate">
+                    <label for="telnet-port" data-error="example: telnet, ssh, ftp" data-success="valid">Port</label>
+                </div>
+            </div>
+    
+            <div class="row">
+                <div class="input-field col">
+                    <select id="telnet-emulate" name="telnet-emulate">
+                        <option value="" disabled selected>---</option>
+                        <option value="basic">basic</option>
+                    </select>
+                    <label for="emulate" data-error="example: Basic, Complex" data-success="valid">What kind of telnet server should we emulate?</label>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="input-field col">
+                    <button onclick="post('telnet')" class="waves-effect waves-light teal lighten-1 btn">Submit</button>
+                </div>
+            </div>
+
+    </div>
+</div>
+
+<div id="delete-service-modal" class="modal-gap modal">
+    <div class="modal-content">
+    </div>
+</div>
+
+{{ end }}

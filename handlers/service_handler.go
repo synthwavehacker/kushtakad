@@ -27,6 +27,7 @@ func DeleteService(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp = NewResponse("error", "Unable to decode response body", err)
 		w.Write(resp.JSON())
+		return
 	}
 	log.Debug(scfgFinder.ServiceID)
 
@@ -150,16 +151,16 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 	cfg, err := CreateService(serviceType, sensor, r, tx)
 	if err != nil {
 		tx.Rollback()
-		r := NewResponse("error", "Unable to create service", err)
-		w.Write(r.JSON())
+		resp = NewResponse("error", "Unable to create service", err)
+		w.Write(resp.JSON())
 		return
 	}
 
 	err = tx.Save(&cfg)
 	if err != nil {
 		tx.Rollback()
-		r := NewResponse("error", "Unable to save service configuration", err)
-		w.Write(r.JSON())
+		resp = NewResponse("error", "Unable to save service configuration", err)
+		w.Write(resp.JSON())
 		return
 	}
 
@@ -167,16 +168,16 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 	err = tx.Update(&sensor)
 	if err != nil {
 		tx.Rollback()
-		r := NewResponse("error", "Unable to update sensor", err)
-		w.Write(r.JSON())
+		resp = NewResponse("error", "Unable to update sensor", err)
+		w.Write(resp.JSON())
 		return
 	}
 
 	err = tx.Commit()
 	if err != nil {
 		tx.Rollback()
-		r := NewResponse("error", "unable to commit tx", err)
-		w.Write(r.JSON())
+		resp := NewResponse("error", "unable to commit tx", err)
+		w.Write(resp.JSON())
 		return
 	}
 

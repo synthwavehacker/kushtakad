@@ -1,0 +1,75 @@
+<div class="row">
+    <div class="col s12 m12 l12">
+        <form class="tform z-depth-1">
+
+            <div class="row">
+                <h5 class="col s12 m12 l12">Automatic Https</h5>
+            </div>
+
+            <div class="row">
+                <div class="input-field col s12 m6 16">
+                    <input id="fqdn" type="text" name="fqdn" value="{{ .Forms.Smtp.Sender }}">
+                    <label for="fqdn" data-error="example: Admin" data-success="valid">FQDN</label>
+                    <span class="helper-text" data-error="wrong" data-success="right">example: (test.example.com, kushtaka.example.com, www.example.com)</span>
+                </div>
+
+            <div class="row">
+                <div class="col s12 m8 18">
+                    <button onclick="postReboot()" class="waves-effect waves-light teal lighten-1 btn">Save</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+<div class="col s12 m6 l6"></div>
+
+
+<script>
+
+
+    var uri = "{{ .URI }}/kushtaka/https/reboot";
+ 
+
+    function getForm() {
+        return {
+            fqdn: document.getElementById("fqdn").value,
+        };
+    }
+
+    function postReboot() {
+        var url = uri;
+        var data = getForm();
+        M.toast({html: "Trying to send...", classes: 'orange lighten-1'})
+
+        console.log(data);
+        postData(data, url);
+    }
+
+
+    function postData(data, url) {
+        fetch(url, {
+        method: 'POST', // or 'PUT'
+        body: JSON.stringify(data), // data can be `string` or {object}!
+        headers:{
+            'Content-Type': 'application/json'
+        }
+        }).then(res => res.json())
+        .then(response => respFunc(response))
+        .catch(error => errc(error));
+    }
+
+
+    function respFunc(resp) {
+        if (resp.Status === "success") {
+            M.toast({html: resp.Message , classes: 'green lighten-1'})
+        } else {
+            M.toast({html: resp.Message , classes: 'red lighten-1'})
+        }
+    }
+
+    function errc(err) {
+        M.toast({html: err, classes: 'red lighten-1'})
+        console.error('Error:', err);
+    }
+</script>
