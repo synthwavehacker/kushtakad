@@ -63,7 +63,7 @@ func (fqdn *FQDN) BuildExternalIP() {
 }
 
 func (fqdn *FQDN) TestPort80() (bool, error) {
-	conn, err := net.Listen("tcp", "localhost:80")
+	conn, err := net.Listen("tcp", ":80")
 	if err != nil {
 		return false, err
 	}
@@ -73,7 +73,7 @@ func (fqdn *FQDN) TestPort80() (bool, error) {
 }
 
 func (fqdn *FQDN) TestPort443() (bool, error) {
-	conn, err := net.Listen("tcp", "localhost:443")
+	conn, err := net.Listen("tcp", ":443")
 	if err != nil {
 		return false, err
 	}

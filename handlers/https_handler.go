@@ -93,8 +93,8 @@ func PostTestFQDN(w http.ResponseWriter, r *http.Request) {
 		resps = append(resps, resp)
 	}
 
-	le := models.NewStageLE("jfolkins@gmail.com", []string{"www.acloudtree.com"})
-	app.LE <- le
+	//le := models.NewStageLE(app.User.Email, []string{domain.FQDN})
+	//app.LE <- le
 
 	app.Render.JSON(w, 200, resps)
 	log.Debug("End")
