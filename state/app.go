@@ -39,6 +39,7 @@ type App struct {
 	Render    *render.Render
 	ServerHub *ServerHub
 	Reboot    chan bool
+	LE        chan models.LE
 }
 
 func tmplFuncs() []template.FuncMap {
@@ -83,32 +84,46 @@ func NewRender(layout string, box *packr.Box) *render.Render {
 	})
 }
 
+type Config struct {
+	Reponse         http.ResponseWriter
+	Request         *http.Request
+	DB              *storm.DB
+	Session         *sessions.Session
+	FilesystemStore *sessions.FilesystemStore
+	Box             *packr.Box
+	Reboot          chan bool
+	LE              chan models.LE
+}
+
 // NewApp returns and instance of App
 // App instances live during the lifecycle of a single http request
-func NewApp(w http.ResponseWriter, r *http.Request, db *storm.DB, sess *sessions.Session, fss *sessions.FilesystemStore, box *packr.Box, reboot chan bool) (*App, error) {
+func NewApp(cfg *Config) (*App, error) {
 
-	ren := NewRender("admin/layouts/main", box)
-	settings, err := models.FindSettings(db)
+	ren := NewRender("admin/layouts/main", cfg.Box)
+	settings, err := models.FindSettings(cfg.DB)
 	if err != nil {
 		return nil, err
 	}
 
-	hub := newServerHub(db)
-	go hub.run()
+	// TODO this is for websockets? I have no idea what I was thinking but a new instance doesn't seem right
+	// this should be move to server?
+	//hub := newServerHub(cfg.DB)
+	//go hub.run()
 
 	return &App{
-		ServerHub: hub,
-		Response:  w,
-		Request:   r,
-		DB:        db,
-		Session:   sess,
-		FileStore: fss,
-		Box:       box,
+		//ServerHub: hub,
+		Response:  cfg.Reponse,
+		Request:   cfg.Request,
+		DB:        cfg.DB,
+		Session:   cfg.Session,
+		FileStore: cfg.FilesystemStore,
+		Box:       cfg.Box,
 		Render:    ren,
 		Settings:  settings,
 		View:      NewView(),
 		User:      &models.User{},
-		Reboot:    reboot,
+		Reboot:    cfg.Reboot,
+		LE:        cfg.LE,
 	}, nil
 
 }

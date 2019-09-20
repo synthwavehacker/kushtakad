@@ -14,7 +14,7 @@ type ServerHub struct {
 	db         *storm.DB
 }
 
-func newServerHub(db *storm.DB) *ServerHub {
+func NewServerHub(db *storm.DB) *ServerHub {
 	return &ServerHub{
 		broadcast:  make(chan *ClientMsg),
 		register:   make(chan *Client),
@@ -23,7 +23,7 @@ func newServerHub(db *storm.DB) *ServerHub {
 	}
 }
 
-func (h *ServerHub) run() {
+func (h *ServerHub) Run() {
 	for {
 		select {
 		case client := <-h.register:

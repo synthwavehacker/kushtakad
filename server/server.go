@@ -31,13 +31,15 @@ var (
 	box      *packr.Box
 	settings models.Settings
 	reboot   chan bool
+	le       chan models.LE
 	err      error
 )
 
-func RunServer(r chan bool) *http.Server {
+func RunServer(r chan bool, l chan models.LE) *http.Server {
 	gob.Register(&state.App{})
 	box = packr.New(assetsFolder, "../static")
 	reboot = r
+	le = l
 
 	err = state.SetupFileStructure(box)
 	if err != nil {
@@ -139,7 +141,7 @@ func RunServer(r chan bool) *http.Server {
 
 	// https
 	kushtaka.HandleFunc("/https", handlers.GetHttps).Methods("GET")
-	kushtaka.HandleFunc("/https/reboot", handlers.PostHttps).Methods("POST")
+	kushtaka.HandleFunc("/https/test", handlers.PostTestFQDN).Methods("POST")
 
 	// wire up sub routers
 	rtr.PathPrefix("/login").Handler(negroni.New(
@@ -251,7 +253,17 @@ func before(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	}
 	sess.Options.HttpOnly = true
 
-	app, err := state.NewApp(w, r, db, sess, fss, box, reboot)
+	cfg := &state.Config{
+		Reponse:         w,
+		Request:         r,
+		DB:              db,
+		Session:         sess,
+		FilesystemStore: fss,
+		Box:             box,
+		Reboot:          reboot,
+		LE:              le,
+	}
+	app, err := state.NewApp(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
