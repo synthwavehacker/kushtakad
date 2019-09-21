@@ -69,7 +69,10 @@ func RunServer(r chan bool, l chan models.LE) *http.Server {
 	rtr.HandleFunc("/assets/{theme}/{dir}/{file}", handlers.Asset).Methods("GET")
 	rtr.HandleFunc("/setup", handlers.GetSetup).Methods("GET")
 	rtr.HandleFunc("/setup", handlers.PostSetup).Methods("POST")
-	rtr.HandleFunc("/t/{t}/i.png", handlers.GetTestToken).Methods("GET")
+	rtr.HandleFunc("/t/{t}/i.png", handlers.GetLinkEvent).Methods("GET")
+	rtr.HandleFunc("/p/{t}/i.png", handlers.GetPdfEvent).Methods("GET")
+	rtr.HandleFunc("/d/{t}/i.png", handlers.GetDocxEvent).Methods("GET")
+
 	rtr.HandleFunc("/create-pdf-token", handlers.CreatePdfToken).Methods("GET")
 	rtr.HandleFunc("/create-docx-token", handlers.CreateDocxToken).Methods("GET")
 

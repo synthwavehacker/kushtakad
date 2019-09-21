@@ -33,11 +33,22 @@ import (
 	"bytes"
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
+
+	"github.com/kushtaka/kushtakad/helpers"
 )
+
+type DocxContext struct {
+	Key          string
+	Url          string
+	FileLocation string
+}
 
 //Contains functions to work with data from a zip file
 type ZipData interface {
@@ -439,4 +450,38 @@ func encode(s string) (string, error) {
 	output = strings.Replace(output, "</string>", "", 1)
 	output = strings.Replace(output, "&#xD;&#xA;", "<w:br/>", -1) // \r\n => newline
 	return output, nil
+}
+
+//d.ReplaceFooterRaw("HONEYDROP_TOKEN_URL", "http://localhost:3000/blah.png")
+func BuildDocx(url string, b []byte) (*DocxContext, error) {
+	dctx := &DocxContext{}
+
+	r, err := ReadDocxFromMemory(bytes.NewReader(b), int64(len(b)))
+	if err != nil {
+		return dctx, err
+	}
+	defer r.Close()
+
+	min := time.Date(2014, 1, 0, 0, 0, 0, 0, time.UTC).Unix()
+	max := time.Date(2018, 1, 0, 0, 0, 0, 0, time.UTC).Unix()
+	delta := max - min
+	sec := rand.Int63n(delta) + min
+	created := fmt.Sprintf("%s", time.Unix(sec, 0).Format("2006-01-02T15:04:05Z"))
+	now := fmt.Sprintf("%s", time.Now().UTC().Format("2006-01-02T15:04:05Z"))
+
+	d := r.Editable()
+	d.ReplaceCoreRaw("aaaaaaaaaaaaaaaaaaaa", created)
+	d.ReplaceCoreRaw("bbbbbbbbbbbbbbbbbbbb", now)
+	retUrl, retKey := helpers.GenerateLink(url, "d", 32)
+	d.ReplaceFooterRaw("HONEYDROP_TOKEN_URL", retUrl)
+	filename, err := d.WriteToTmpFile()
+	if err != nil {
+		return dctx, err
+	}
+
+	dctx.Url = retUrl
+	dctx.Key = retKey
+	dctx.FileLocation = filename
+	return dctx, nil
+
 }
