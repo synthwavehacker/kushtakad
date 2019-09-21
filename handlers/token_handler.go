@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/kushtaka/kushtakad/models"
 	"github.com/kushtaka/kushtakad/state"
+	"github.com/kushtaka/kushtakad/tokens/docx"
 	"github.com/kushtaka/kushtakad/tokens/pdf"
 )
 
@@ -27,9 +28,9 @@ func GetTestToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "image/jpeg")
+	w.Header().Set("Content-Type", "image/png")
 	w.Header().Set("Content-Length", strconv.Itoa(len(i)))
-	http.ServeContent(w, r, "canary.docx", time.Now(), bytes.NewReader(i))
+	http.ServeContent(w, r, "i.png", time.Now(), bytes.NewReader(i))
 }
 
 func CreateDocxToken(w http.ResponseWriter, r *http.Request) {
@@ -39,21 +40,27 @@ func CreateDocxToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token := &models.Token{}
-	ts, err := token.BuildDocx(app.Box)
+	docxBytes, err := app.Box.Find("files/template.docx")
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	data, err := ioutil.ReadFile(ts)
+	//token := &models.Token{}
+	dctx, err := docx.BuildDocx(app.Settings.URI, docxBytes)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	w.Header().Set("Content-Disposition", "attachment; filename=canary.docx")
-	http.ServeContent(w, r, "canary.docx", time.Now(), bytes.NewReader(data))
+	data, err := ioutil.ReadFile(dctx.FileLocation)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	w.Header().Set("Content-Disposition", "attachment; filename=kushtaka.docx")
+	http.ServeContent(w, r, "kushtaka.docx", time.Now(), bytes.NewReader(data))
 }
 
 func CreatePdfToken(w http.ResponseWriter, r *http.Request) {
@@ -63,16 +70,22 @@ func CreatePdfToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pdfc, err := pdf.NewPdfContext("http://localhost:3000", app.Box)
+	PdfFile := "files/template.pdf"
+	pdfb, err := app.Box.Find(PdfFile)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	log.Error("PDFC-URL", pdfc.Url)
+	//t := &models.Token{}
+	pdfc, err := pdf.NewPdfContext(app.Settings.URI, pdfb)
+	if err != nil {
+		log.Error(err)
+		return
+	}
 
-	w.Header().Set("Content-Disposition", "attachment; filename=canary.pdf")
-	http.ServeContent(w, r, "canary.pdf", time.Now(), bytes.NewReader(pdfc.Buffer.Bytes()))
+	w.Header().Set("Content-Disposition", "attachment; filename=kushtaka.pdf")
+	http.ServeContent(w, r, "kushtaka.pdf", time.Now(), bytes.NewReader(pdfc.Buffer.Bytes()))
 }
 
 func GetToken(w http.ResponseWriter, r *http.Request) {

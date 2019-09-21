@@ -10,11 +10,32 @@
         <div class="row">
             <div class="input-field col s12">
                 <input id="name" type="text" name="name" value="{{ .Forms.Token.Name }}" required class="validate">
-                <label for="name" data-error="example: devops-nyc-01" data-success="valid">Give the token a name</label>
+                <label for="name" data-error="example: devops-nyc-01" data-success="valid">Name</label>
+                <span class="helper-text" data-error="wrong" data-success="right">A unique name for this token</span>
             </div>
+
+            <div class="input-field col s12">
+                <textarea id="note" class="materialize-textarea" type="text" name="note" value="{{ .Forms.Token.Note }}" required class="validate"></textarea>
+                <label for="note">Note</label>
+                <span class="helper-text" data-error="wrong" data-success="right">Leave a note with your intentions for this token. Where will you place it? What are you hoping to accomplish? etc</span>
+            </div>
+
+
+            <div class="input-field col">
+                <select name="teamId">
+                    <option value="" disabled selected>Team</option>
+                    {{ if len .Teams }}
+                        {{ range $key, $v := .Teams }}
+                            <option value="{{ $v.ID }}">{{ $v.Name }}</option>
+                        {{ end }}
+                    {{ end }}
+                </select>
+                <span class="helper-text" data-error="wrong" data-success="right">This is the team that will get the email alerts when a token is accessed.</span>
+            </div>
+
             <div class="input-field col s12">
                 <select name="type">
-                    <option value="" disabled selected>Choose a token type</option>
+                    <option value="" disabled selected>Type</option>
                     <option value="link">Link</option>
                     <option value="pdf">Pdf</option>
                     <option value="docx">Docx</option>

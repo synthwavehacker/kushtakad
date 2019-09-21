@@ -16,6 +16,7 @@ require (
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/gobuffalo/envy v1.7.1 // indirect
 	github.com/gobuffalo/logger v1.0.1 // indirect
+	github.com/gobuffalo/packr v1.30.1
 	github.com/gobuffalo/packr/v2 v2.6.0
 	github.com/gorilla/mux v1.7.3
 	github.com/gorilla/securecookie v1.1.1

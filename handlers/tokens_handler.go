@@ -25,6 +25,15 @@ func GetTokens(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var teams []models.Team
+	err = app.DB.All(&teams)
+	if err != nil {
+		app.Fail(err.Error())
+		http.Redirect(w, r, redirUrl, 302)
+		return
+	}
+
+	app.View.Teams = teams
 	app.View.Tokens = tokens
 	app.View.AddCrumb("Tokens", "#")
 	app.View.Links.Tokens = "active"
@@ -39,8 +48,11 @@ func PostTokens(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	name := r.FormValue("name")
-	token := &models.Token{Name: name}
+	token := &models.Token{
+		Name: r.FormValue("name"),
+		Note: r.FormValue("note"),
+		Type: r.FormValue("type"),
+	}
 	app.View.Forms.Token = token
 	err = token.ValidateCreate()
 	if err != nil {
@@ -57,7 +69,8 @@ func PostTokens(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback()
 
-	tx.One("Name", name, token)
+	t := &models.Token{}
+	tx.One("Name", token.Name, t)
 	if token.ID > 0 {
 		app.Fail("Token using that name already exists.")
 		http.Redirect(w, r, redirUrl, 302)
