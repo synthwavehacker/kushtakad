@@ -15,6 +15,7 @@ func GetHttps(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	app.View.Links.Https = "active"
 	app.View.AddCrumb("HTTPS", "#")
 	app.Render.HTML(w, http.StatusOK, "admin/pages/https", app.View)
 	return

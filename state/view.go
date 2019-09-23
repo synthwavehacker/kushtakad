@@ -23,7 +23,7 @@ type View struct {
 	Sensors        []models.Sensor
 	Users          []models.User
 	SensorServices []models.ServiceCfg
-	Events []events.EventManager
+	Events         []events.EventManager
 }
 
 type Crumb struct {
@@ -40,6 +40,8 @@ type Links struct {
 	Sensors   string
 	Users     string
 	Teams     string
+	Https     string
+	Smtp      string
 }
 
 func NewView() *View {
@@ -53,7 +55,7 @@ func NewView() *View {
 		FlashFail:    ff,
 		FlashSuccess: fs,
 		Teams:        tm,
-		Events: events,
+		Events:       events,
 		Users:        users,
 		Crumbs:       crumbs,
 		Links:        &Links{},

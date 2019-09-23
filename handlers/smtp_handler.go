@@ -25,6 +25,7 @@ func GetSmtp(w http.ResponseWriter, r *http.Request) {
 
 	}
 
+	app.View.Links.Smtp = "active"
 	app.View.AddCrumb("SMTP", "#")
 	app.Render.HTML(w, http.StatusOK, "admin/pages/smtp", app.View)
 	return
