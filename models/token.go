@@ -7,14 +7,13 @@ import (
 )
 
 type Token struct {
-	ID       int64  `storm:"id,increment,index"`
-	Name     string `storm:"index,unique" json:"name"`
-	Note     string `storm:"index" json:"note"`
-	Type     string // Weblink, Pdf, Docx
-	Token    string `storm:"index,unique"`
-	Url      string `storm:"index,unique"`
-	TeamsIds []int64
-	File     []byte
+	ID     int64  `storm:"id,increment,index"`
+	TeamID int64  `storm:"id,increment,index"`
+	Name   string `storm:"index,unique" json:"name"`
+	Note   string `storm:"index" json:"note"`
+	Type   string `storm:"index" json:"type"` // Weblink, Pdf, Docx
+
+	TokenContext interface{}
 }
 
 func NewToken() *Token {

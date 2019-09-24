@@ -21,7 +21,7 @@ func RandomString(n int) string {
 
 func GenerateLink(baseurl, namespace string, size int) (string, string) {
 	key := RandomString(size)
-	url := fmt.Sprintf("%s/%s/%s/i.png", baseurl, key)
+	url := fmt.Sprintf("%s/%s/%s/i.png", baseurl, namespace, key)
 	log.Debugf("Url %s : Key %s", url, key)
 	return key, url
 }

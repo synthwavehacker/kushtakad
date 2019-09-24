@@ -45,9 +45,10 @@ import (
 )
 
 type DocxContext struct {
-	Key          string
-	Url          string
-	FileLocation string
+	ID        int64 `storm:"index,unique`
+	Key       string
+	Url       string
+	FileBytes []byte
 }
 
 //Contains functions to work with data from a zip file
@@ -453,7 +454,7 @@ func encode(s string) (string, error) {
 }
 
 //d.ReplaceFooterRaw("HONEYDROP_TOKEN_URL", "http://localhost:3000/blah.png")
-func BuildDocx(url string, b []byte) (*DocxContext, error) {
+func BuildDocx(baseurl string, b []byte) (*DocxContext, error) {
 	dctx := &DocxContext{}
 
 	r, err := ReadDocxFromMemory(bytes.NewReader(b), int64(len(b)))
@@ -472,16 +473,18 @@ func BuildDocx(url string, b []byte) (*DocxContext, error) {
 	d := r.Editable()
 	d.ReplaceCoreRaw("aaaaaaaaaaaaaaaaaaaa", created)
 	d.ReplaceCoreRaw("bbbbbbbbbbbbbbbbbbbb", now)
-	retUrl, retKey := helpers.GenerateLink(url, "d", 32)
+	retKey, retUrl := helpers.GenerateLink(baseurl, "d", 32)
 	d.ReplaceFooterRaw("HONEYDROP_TOKEN_URL", retUrl)
-	filename, err := d.WriteToTmpFile()
+
+	var buf bytes.Buffer
+	err = d.Write(&buf)
 	if err != nil {
 		return dctx, err
 	}
 
 	dctx.Url = retUrl
 	dctx.Key = retKey
-	dctx.FileLocation = filename
+	dctx.FileBytes = buf.Bytes()
 	return dctx, nil
 
 }

@@ -8,6 +8,7 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
 	github.com/asdine/storm v2.1.2+incompatible
 	github.com/boltdb/bolt v1.3.1
+	github.com/br0xen/boltbrowser v0.0.0-20190218150438-8c302bd236f0 // indirect
 	github.com/codegangsta/envy v0.0.0-20141216192214-4b78388c8ce4 // indirect
 	github.com/codegangsta/gin v0.0.0-20171026143024-cafe2ce98974 // indirect
 	github.com/fatih/color v1.7.0

@@ -6,6 +6,7 @@ import (
 
 	"github.com/kushtaka/kushtakad/models"
 	"github.com/kushtaka/kushtakad/state"
+	"github.com/kushtaka/kushtakad/tokens/docx"
 )
 
 func GetTokens(w http.ResponseWriter, r *http.Request) {
@@ -75,6 +76,28 @@ func PostTokens(w http.ResponseWriter, r *http.Request) {
 		app.Fail("Token using that name already exists.")
 		http.Redirect(w, r, redirUrl, 302)
 		return
+	}
+
+	switch token.Type {
+	case "link":
+	case "pdf":
+	case "docx":
+		docxBytes, err := app.Box.Find("files/template.docx")
+		if err != nil {
+			app.Fail("Unable to find template docx.")
+			http.Redirect(w, r, redirUrl, 302)
+			return
+		}
+
+		docxctx, err := docx.BuildDocx(app.Settings.URI, docxBytes)
+		if err != nil {
+			app.Fail("Unable to build docx from template.")
+			http.Redirect(w, r, redirUrl, 302)
+			return
+		}
+
+		token.TokenContext = docxctx
+		log.Debug(docxctx)
 	}
 
 	err = tx.Save(token)

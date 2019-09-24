@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"bytes"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
@@ -33,34 +32,48 @@ func GetTestToken(w http.ResponseWriter, r *http.Request) {
 	http.ServeContent(w, r, "i.png", time.Now(), bytes.NewReader(i))
 }
 
-func CreateDocxToken(w http.ResponseWriter, r *http.Request) {
+func DownloadDocxToken(w http.ResponseWriter, r *http.Request) {
+	redirUrl := "/kushtaka/tokens/page/1/limit/100"
 	app, err := state.Restore(r)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	docxBytes, err := app.Box.Find("files/template.docx")
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
 	if err != nil {
-		log.Error(err)
+		app.Fail(err.Error())
+		http.Redirect(w, r, redirUrl, 302)
 		return
 	}
 
-	//token := &models.Token{}
-	dctx, err := docx.BuildDocx(app.Settings.URI, docxBytes)
+	tx, err := app.DB.Begin(true)
 	if err != nil {
-		log.Error(err)
+		app.Fail(err.Error())
+		http.Redirect(w, r, redirUrl, 302)
+		return
+	}
+	defer tx.Rollback()
+
+	token := &models.Token{TokenContext: &docx.DocxContext{}}
+	tx.One("ID", id, token)
+	if token.ID == 0 || len(token.Name) == 0 {
+		app.Fail("Token not found.")
+		http.Redirect(w, r, redirUrl, 302)
 		return
 	}
 
-	data, err := ioutil.ReadFile(dctx.FileLocation)
-	if err != nil {
-		log.Error(err)
+	dctx, ok := token.TokenContext.(*docx.DocxContext)
+	if !ok {
+		app.Fail("Unable to convert docx.")
+		http.Redirect(w, r, redirUrl, 302)
 		return
 	}
 
 	w.Header().Set("Content-Disposition", "attachment; filename=kushtaka.docx")
-	http.ServeContent(w, r, "kushtaka.docx", time.Now(), bytes.NewReader(data))
+	http.ServeContent(w, r, "kushtaka.docx", time.Now(), bytes.NewReader(dctx.FileBytes))
+	return
 }
 
 func CreatePdfToken(w http.ResponseWriter, r *http.Request) {
