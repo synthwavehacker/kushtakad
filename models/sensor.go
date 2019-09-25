@@ -18,6 +18,7 @@ type Sensor struct {
 	ID     int64        `storm:"id,increment,index"`
 	TeamID int64        `storm:"id,index"`
 	Name   string       `storm:"index,unique" json:"name"`
+	Note   string       `storm:"index" json:"note"`
 	ApiKey string       `storm:"index,unique" json:"api_key"`
 	Cfgs   []ServiceCfg `storm:"index" json:"service_configs`
 	mu     sync.Mutex
@@ -45,6 +46,10 @@ func (s *Sensor) ValidateCreate() error {
 			&s.Name,
 			validation.Required,
 			validation.Length(4, 64).Error("must be between 4-64 characters")),
+		"Note": validation.Validate(
+			&s.Note,
+			validation.Required,
+			validation.Length(1, 3000).Error("must be between 1-3000 characters")),
 		"TeamID": validation.Validate(
 			&s.TeamID,
 			validation.Required.Error("is required")),

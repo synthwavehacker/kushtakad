@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/kushtaka/kushtakad/angel"
+	"github.com/kushtaka/kushtakad/models"
 )
 
 type ServerAngel struct {
@@ -14,11 +15,12 @@ type ServerAngel struct {
 	ServerCancel context.CancelFunc
 	Server       *http.Server
 	Reboot       chan bool
+	LE           chan models.LE
 }
 
 func NewServer(sa *ServerAngel) *http.Server {
 	sctx, scancel := context.WithCancel(context.Background())
-	srv := RunServer(sa.Reboot)
+	srv := RunServer(sa.Reboot, sa.LE)
 	sa.ServerCtx = sctx
 	sa.ServerCancel = scancel
 	return srv
@@ -26,25 +28,33 @@ func NewServer(sa *ServerAngel) *http.Server {
 
 func NewServerAngel() *ServerAngel {
 	reboot := make(chan bool)
+	le := make(chan models.LE)
 	actx, acancel := context.WithCancel(context.Background())
 	sctx, scancel := context.WithCancel(context.Background())
-	srv := RunServer(reboot)
-	sa := &ServerAngel{
+	srv := RunServer(reboot, le)
+	angel.Interuptor(acancel)
+	return &ServerAngel{
 		AngelCtx:     actx,
 		AngelCancel:  acancel,
 		ServerCtx:    sctx,
 		ServerCancel: scancel,
 		Server:       srv,
 		Reboot:       reboot,
+		LE:           le,
 	}
-	angel.Interuptor(sa.AngelCancel)
-	return sa
 }
 
 func Run() {
 	sa := NewServerAngel()
 	for {
 		select {
+		case le := <-sa.LE:
+			log.Debug("Let's Encrypt Start")
+			err := le.Magic.Manage(le.Domains)
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Debug("Let's Encrypt End")
 		case <-sa.Reboot:
 			log.Info("Reboot channel signaled...")
 			log.Info("Shutting down server...")
@@ -69,3 +79,13 @@ func Run() {
 	}
 
 }
+
+/*
+func le(magic certmagic.Config) error {
+	// this obtains certificates or renews them if necessary
+	err := magic.Manage([]string{"example.com", "sub.example.com"})
+	if err != nil {
+		return err
+	}
+}
+*/

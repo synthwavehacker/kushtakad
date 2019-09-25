@@ -9,7 +9,9 @@ type Response struct {
 	Status  string
 	Message string
 	Err     error
+	Type    string
 	Service interface{}
+	Obj     interface{}
 }
 
 func (r *Response) AddService(serv interface{}) {

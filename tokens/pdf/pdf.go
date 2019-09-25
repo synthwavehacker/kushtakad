@@ -8,16 +8,13 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math/rand"
 	"regexp"
 	"strconv"
-	"time"
 
-	"github.com/gobuffalo/packr/v2"
+	"github.com/kushtaka/kushtakad/helpers"
 )
 
 const StaticUrl = "http://abcdefghijklmnopqrstuvwxyz.zyxwvutsrqponmlkjihgfedcba.aceegikmoqsuwy.bdfhjlnprtvxz"
-const PdfFile = "files/template.pdf"
 const StreamOffset = 793
 
 func assertSize(name string, want, is int) error {
@@ -34,18 +31,13 @@ type PdfContext struct {
 	Buffer bytes.Buffer
 }
 
-func NewPdfContext(url string, box *packr.Box) (pdfc *PdfContext, err error) {
+func NewPdfContext(url string, pdfb []byte) (pdfc *PdfContext, err error) {
 	var bf bytes.Buffer
 	var size int
 	var bytesZlib []byte
 	var retKey, retUrl string
 	pdfc = &PdfContext{}
 	size = 1
-
-	pdfb, err := box.Find(PdfFile)
-	if err != nil {
-		return nil, err
-	}
 
 	re := regexp.MustCompile(".*\\/Length ([0-9]+)\\/.*")
 	match := re.FindAll(pdfb[StreamOffset:], -1)
@@ -92,9 +84,9 @@ func NewPdfContext(url string, box *packr.Box) (pdfc *PdfContext, err error) {
 	io.Copy(buf, zr)
 	zr.Close()
 
+	// this brute forces a url of the correct  buffer size in order to fit in the zlib compressed space of the pdf
 	for len(bytesZlib) != len(buf.Bytes()) {
-		retKey = RandomString(size)
-		retUrl = url + "/t/" + retKey + "/i.png"
+		retUrl, retKey = helpers.GenerateLink(url, "p", size)
 		rp := bytes.Replace([]byte(buf.String()), []byte(StaticUrl), []byte(retUrl), -1)
 
 		var bf bytes.Buffer
@@ -111,10 +103,10 @@ func NewPdfContext(url string, box *packr.Box) (pdfc *PdfContext, err error) {
 		bytesZlib = bf.Bytes()
 		if len(bytesZlib) > len(buf.Bytes()) {
 			e := `
-			This is a hacky method. We will try and fix it later and you shouldn't see this error. 
+			This is a hacky bruteforce method. We will try and fix it later and you shouldn't see this error but... 
 			The zlib compressed URL we are replacing is too large and won't fit in the pdf. 
-			That shouldn't be the cast, BUT maybe you are using a HUGE domain name.
-			If so, I'd like to understand more.
+			That shouldn't be the case, BUT somehow you broke it. Maybe you are using a HUGE domain name?
+			I'd like to understand more so feel free to file a bug project @ https://github.com/kushtaka/kushtakad.
 			`
 			return nil, errors.New(e)
 		}
@@ -168,17 +160,4 @@ func NewPdfContext(url string, box *packr.Box) (pdfc *PdfContext, err error) {
 	pdfc.Buffer = bf
 	return pdfc, nil
 
-}
-
-// RandomString isn't crypto secure or anything
-// we just need a psuedo random key to be generated for our canary token
-func RandomString(n int) string {
-	rand.Seed(time.Now().UnixNano())
-	var letter = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letter[rand.Intn(len(letter))]
-	}
-	return string(b)
 }

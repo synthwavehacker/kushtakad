@@ -7,13 +7,17 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
 	github.com/asdine/storm v2.1.2+incompatible
+	github.com/boltdb/bolt v1.3.1
+	github.com/br0xen/boltbrowser v0.0.0-20190218150438-8c302bd236f0 // indirect
 	github.com/codegangsta/envy v0.0.0-20141216192214-4b78388c8ce4 // indirect
 	github.com/codegangsta/gin v0.0.0-20171026143024-cafe2ce98974 // indirect
 	github.com/fatih/color v1.7.0
+	github.com/glendc/go-external-ip v0.0.0-20170425150139-139229dcdddd
 	github.com/go-acme/lego v2.7.2+incompatible // indirect
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/gobuffalo/envy v1.7.1 // indirect
 	github.com/gobuffalo/logger v1.0.1 // indirect
+	github.com/gobuffalo/packr v1.30.1
 	github.com/gobuffalo/packr/v2 v2.6.0
 	github.com/gorilla/mux v1.7.3
 	github.com/gorilla/securecookie v1.1.1

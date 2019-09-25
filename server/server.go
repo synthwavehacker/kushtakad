@@ -31,13 +31,15 @@ var (
 	box      *packr.Box
 	settings models.Settings
 	reboot   chan bool
+	le       chan models.LE
 	err      error
 )
 
-func RunServer(r chan bool) *http.Server {
+func RunServer(r chan bool, l chan models.LE) *http.Server {
 	gob.Register(&state.App{})
 	box = packr.New(assetsFolder, "../static")
 	reboot = r
+	le = l
 
 	err = state.SetupFileStructure(box)
 	if err != nil {
@@ -67,9 +69,12 @@ func RunServer(r chan bool) *http.Server {
 	rtr.HandleFunc("/assets/{theme}/{dir}/{file}", handlers.Asset).Methods("GET")
 	rtr.HandleFunc("/setup", handlers.GetSetup).Methods("GET")
 	rtr.HandleFunc("/setup", handlers.PostSetup).Methods("POST")
-	rtr.HandleFunc("/t/{t}/i.png", handlers.GetTestToken).Methods("GET")
+	rtr.HandleFunc("/t/{t}/i.png", handlers.GetLinkEvent).Methods("GET")
+	rtr.HandleFunc("/p/{t}/i.png", handlers.GetPdfEvent).Methods("GET")
+	rtr.HandleFunc("/d/{t}/i.png", handlers.GetDocxEvent).Methods("GET")
+
 	rtr.HandleFunc("/create-pdf-token", handlers.CreatePdfToken).Methods("GET")
-	rtr.HandleFunc("/create-docx-token", handlers.CreateDocxToken).Methods("GET")
+	//rtr.HandleFunc("/create-docx-token", handlers.CreateDocxToken).Methods("GET")
 
 	rtr.HandleFunc("/", handlers.IndexCheckr).Methods("GET")
 	rtr.NotFoundHandler = &NotFound{}
@@ -107,6 +112,8 @@ func RunServer(r chan bool) *http.Server {
 	// tokens
 	kushtaka.HandleFunc("/tokens/page/{pid}/limit/{oid}", handlers.GetTokens).Methods("GET")
 	kushtaka.HandleFunc("/tokens", handlers.PostTokens).Methods("POST")
+
+	kushtaka.HandleFunc("/download/token/docx/{id}", handlers.DownloadDocxToken).Methods("GET")
 	// token
 	kushtaka.HandleFunc("/token/{id}", handlers.GetToken).Methods("GET")
 	kushtaka.HandleFunc("/token", handlers.PostToken).Methods("POST")
@@ -139,7 +146,7 @@ func RunServer(r chan bool) *http.Server {
 
 	// https
 	kushtaka.HandleFunc("/https", handlers.GetHttps).Methods("GET")
-	kushtaka.HandleFunc("/https/reboot", handlers.PostHttps).Methods("POST")
+	kushtaka.HandleFunc("/https/test", handlers.PostTestFQDN).Methods("POST")
 
 	// wire up sub routers
 	rtr.PathPrefix("/login").Handler(negroni.New(
@@ -251,7 +258,17 @@ func before(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	}
 	sess.Options.HttpOnly = true
 
-	app, err := state.NewApp(w, r, db, sess, fss, box, reboot)
+	cfg := &state.Config{
+		Reponse:         w,
+		Request:         r,
+		DB:              db,
+		Session:         sess,
+		FilesystemStore: fss,
+		Box:             box,
+		Reboot:          reboot,
+		LE:              le,
+	}
+	app, err := state.NewApp(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}

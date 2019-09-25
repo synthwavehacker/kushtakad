@@ -6,6 +6,7 @@ import (
 
 	"github.com/kushtaka/kushtakad/models"
 	"github.com/kushtaka/kushtakad/state"
+	"github.com/kushtaka/kushtakad/tokens/docx"
 )
 
 func GetTokens(w http.ResponseWriter, r *http.Request) {
@@ -25,6 +26,15 @@ func GetTokens(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var teams []models.Team
+	err = app.DB.All(&teams)
+	if err != nil {
+		app.Fail(err.Error())
+		http.Redirect(w, r, redirUrl, 302)
+		return
+	}
+
+	app.View.Teams = teams
 	app.View.Tokens = tokens
 	app.View.AddCrumb("Tokens", "#")
 	app.View.Links.Tokens = "active"
@@ -39,8 +49,11 @@ func PostTokens(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	name := r.FormValue("name")
-	token := &models.Token{Name: name}
+	token := &models.Token{
+		Name: r.FormValue("name"),
+		Note: r.FormValue("note"),
+		Type: r.FormValue("type"),
+	}
 	app.View.Forms.Token = token
 	err = token.ValidateCreate()
 	if err != nil {
@@ -57,11 +70,34 @@ func PostTokens(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback()
 
-	tx.One("Name", name, token)
+	t := &models.Token{}
+	tx.One("Name", token.Name, t)
 	if token.ID > 0 {
 		app.Fail("Token using that name already exists.")
 		http.Redirect(w, r, redirUrl, 302)
 		return
+	}
+
+	switch token.Type {
+	case "link":
+	case "pdf":
+	case "docx":
+		docxBytes, err := app.Box.Find("files/template.docx")
+		if err != nil {
+			app.Fail("Unable to find template docx.")
+			http.Redirect(w, r, redirUrl, 302)
+			return
+		}
+
+		docxctx, err := docx.BuildDocx(app.Settings.URI, docxBytes)
+		if err != nil {
+			app.Fail("Unable to build docx from template.")
+			http.Redirect(w, r, redirUrl, 302)
+			return
+		}
+
+		token.TokenContext = docxctx
+		log.Debug(docxctx)
 	}
 
 	err = tx.Save(token)
